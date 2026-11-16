@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Phiếu gửi yêu cầu muasamcong – BQLDA xã Củ Chi</title><style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#1d2433;--mute:#667085;--line:#e4e7ec;--pri:#1f5fa8;--pri2:#e8f0fb;--ok:#1a7f4b;--warn:#b45309;--bad:#b42318}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.45}
+header{background:var(--pri);color:#fff;padding:14px 16px}
+header h1{margin:0;font-size:17px;font-weight:600}
+header .sub{opacity:.85;font-size:13px;margin-top:2px}
+main{max-width:1100px;margin:0 auto;padding:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px}
+.muted{color:var(--mute);font-size:13px}
+label{display:block;font-weight:600;font-size:14px;margin:12px 0 4px}
+label .req{color:var(--bad)}
+input,select,textarea{width:100%;padding:10px;border:1px solid #cfd4dc;border-radius:8px;font:inherit;background:#fff}
+textarea{min-height:70px}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--pri);background:var(--pri);color:#fff;padding:10px 16px}
+button.ghost{background:#fff;color:var(--pri)}
+button:disabled{opacity:.5;cursor:default}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:8px 12px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.tabs button{background:#fff;color:var(--ink);border:1px solid var(--line);white-space:nowrap;padding:8px 12px}
+.tabs button.on{background:var(--pri);color:#fff;border-color:var(--pri)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.kpi{background:var(--pri2);border-radius:8px;padding:10px}
+.kpi .n{font-size:20px;font-weight:700}
+.kpi .l{font-size:12px;color:var(--mute)}
+.grp{border:1px solid var(--line);border-radius:10px;margin-bottom:10px;background:#fff;overflow:hidden}
+.grp>.hd{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 14px;cursor:pointer;background:#fafbfc}
+.grp>.hd b{font-size:15px}
+.grp>.hd .s{font-size:13px;color:var(--mute);text-align:right}
+.grp>.bd{display:none;padding:0 0 6px}
+.grp.open>.bd{display:block}
+.chev{transition:transform .15s;display:inline-block;margin-right:6px}
+.grp.open .chev{transform:rotate(90deg)}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th,.tbl td{border-top:1px solid var(--line);padding:8px;text-align:left;vertical-align:top}
+.tbl th{background:#f2f4f7;font-size:12px;color:var(--mute);font-weight:600}
+.tbl td.r,.tbl th.r{text-align:right;white-space:nowrap}
+.tbl tr.sub td{background:#f8fafc;font-weight:600;font-size:13px;color:var(--pri)}
+.tbl tr.click{cursor:pointer}
+.tbl tr.click:hover td{background:#f5f8ff}
+.wrap{overflow-x:auto}
+.bar{height:6px;background:#eef1f5;border-radius:3px;overflow:hidden;margin-top:4px;min-width:60px}
+.bar i{display:block;height:100%;background:var(--ok)}
+.pill{display:inline-block;padding:2px 8px;border-radius:12px;font-size:12px;background:#eef1f5;white-space:nowrap}
+.detail{background:#fbfcfe;padding:10px 12px;font-size:14px;white-space:pre-wrap;margin:0}
+.detail dt{font-weight:600;color:var(--mute);font-size:12px;margin-top:8px}
+.detail dd{margin:2px 0 0}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.right{margin-left:auto}
+.msg{padding:12px;border-radius:8px;margin-top:12px}
+.msg.ok{background:#dcfae6;color:#05603a}.msg.err{background:#fee4e2;color:#912018}
+.loading{padding:30px;text-align:center;color:var(--mute)}
+a{color:var(--pri)}
+@media (max-width:640px){.hide-sm{display:none}.tbl{font-size:13px}}
+</style>
+<script>
+// Cầu nối: trang này nằm ngoài Google nên gọi chương trình Apps Script qua mạng, không gửi tài khoản Google
+// (tránh lỗi "/u/1/ – không thể mở tệp" khi máy đăng nhập nhiều tài khoản).
+const API_URL = 'https://script.google.com/macros/s/AKfycbynHwvrBG8jBrutF-KMXoCTvcKU6AWweDvakzbMLNdDqKGR_pVjFVkfbNrcNK3rD08q/exec';
+const GET_API = {
+  getFormInfo: () => ({ api: 'form' }),
+  getTongQuan: (nam, force) => ({ api: 'tq', nam: nam || '', force: force ? '1' : '' }),
+  getHangCho: (tatCa) => ({ api: 'hc', tatCa: tatCa ? '1' : '' }),
+  getKiemTra: (force) => ({ api: 'kt', force: force ? '1' : '' })
+};
+function goiApi_(fn, args) {
+  const req = GET_API[fn]
+    ? fetch(API_URL + '?' + new URLSearchParams(GET_API[fn](...args)), { credentials: 'omit' })
+    : fetch(API_URL, { method: 'POST', credentials: 'omit', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn: fn, args: args }) });
+  return req.then(r => { if (!r.ok) throw new Error('Máy chủ trả lỗi ' + r.status); return r.json(); })
+    .then(j => { if (!j.ok) throw new Error(j.err || 'Lỗi không rõ'); return j.data; })
+    .catch(e => { throw new Error(/Failed to fetch|NetworkError|Load failed/i.test(e.message) ? 'Không kết nối được, kiểm tra mạng rồi thử lại.' : e.message); });
+}
+window.google = { script: { get run() {
+  let ok = () => {}, no = () => {};
+  const p = new Proxy({}, { get(_, k) {
+    if (k === 'withSuccessHandler') return f => { ok = f; return p; };
+    if (k === 'withFailureHandler') return f => { no = f; return p; };
+    return (...a) => { goiApi_(k, a).then(ok, no); };
+  } });
+  return p;
+} } };
+</script></head>
+<body>
+<header><h1>Phiếu gửi yêu cầu thao tác muasamcong</h1><div class="sub">Ban QLDA đầu tư xây dựng xã Củ Chi</div></header>
+<main>
+  <div class="card" id="box"><div class="loading">Đang tải…</div></div>
+</main>
+<script>
+let INFO = null;
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+google.script.run.withSuccessHandler(info => { INFO = info; ve(); })
+  .withFailureHandler(e => $('#box').innerHTML = '<div class="msg err">Lỗi tải phiếu: ' + esc(e.message) + '</div>')
+  .getFormInfo();
+
+function ve() {
+  let ten = '';
+  try { ten = localStorage.getItem('nguoiGui') || ''; } catch (e) {}
+  $('#box').innerHTML = `
+    <div class="muted">Mỗi phiếu là một việc cho một gói thầu. Phiếu gửi xong sẽ vào hàng chờ để xử lý.</div>
+    <label>Người gửi <span class="req">*</span></label><input id="nguoiGui" value="${esc(ten)}" placeholder="Họ và tên">
+    <label>Loại việc <span class="req">*</span></label>
+    <select id="loai"><option value="">— Chọn loại việc —</option>${INFO.loai.map((l, i) => `<option value="${i}">${esc(l.ten)}</option>`).join('')}</select>
+    <label>Dự án <span class="req">*</span></label>
+    <input id="duAn" list="dsDuAn" placeholder="Gõ để tìm, hoặc ghi tên dự án">
+    <datalist id="dsDuAn">${INFO.duAn.map(d => `<option value="${esc(d)}">`).join('')}</datalist>
+    <label>Gói thầu <span class="req" id="goiReq" style="display:none">*</span></label><input id="goiThau" placeholder="Tên gói thầu (ghi đúng như trong quyết định)">
+    <div id="truong"></div>
+    <div class="row" style="margin-top:16px"><button id="gui">Gửi phiếu</button><span id="tt" class="muted"></span></div>
+    <div id="kq"></div>`;
+  $('#loai').onchange = veTruong;
+  $('#gui').onclick = gui;
+}
+
+const MAX_MB = 25;
+function veTruong() {
+  const l = INFO.loai[$('#loai').value];
+  $('#goiReq').style.display = (l && l.goi) ? '' : 'none';
+  if (!l) { $('#truong').innerHTML = ''; return; }
+  $('#truong').innerHTML = (l.note ? `<div class="muted" style="margin-top:10px">${esc(l.note)}</div>` : '') +
+    l.truong.map((t, i) => {
+      const lab = `<label>${esc(t.nhan)} <span class="req" data-r="${i}" style="${t.bat ? '' : 'display:none'}">*</span></label>`;
+      let o;
+      if (t.k === 'file') o = `<input type="file" multiple data-i="${i}" ${t.accept ? `accept="${t.accept}"` : ''}>`;
+      else if (t.k === 'select') o = `<select data-i="${i}"><option value="">— Chọn —</option>${t.chon.map(c => `<option>${esc(c)}</option>`).join('')}</select>`;
+      else if (t.k === 'date') o = `<input type="date" data-i="${i}" onchange="xemNgay(${i})"><div class="muted" data-d="${i}"></div>`;
+      else if (t.dai) o = `<textarea data-i="${i}" placeholder="${esc(t.goiY || '')}"></textarea>`;
+      else o = `<input data-i="${i}" placeholder="${esc(t.goiY || '')}">`;
+      return `<div data-w="${i}">${lab}${o}</div>`;
+    }).join('');
+  const dk = l.truong.findIndex(t => t.dk);
+  if (dk >= 0) document.querySelector(`[data-i="${dk}"]`).onchange = apDK;
+  apDK();
+}
+// Giá trị ô điều khiển (nếu loại việc có) quyết định ô nào ẩn, ô nào bắt buộc.
+function giaTriDK(l) {
+  const dk = l.truong.findIndex(t => t.dk);
+  return dk >= 0 ? document.querySelector(`[data-i="${dk}"]`).value : '';
+}
+function anTruong(t, v) { return !!(t.dkAn && v === t.dkAn); }
+function batTruong(t, v) { return !!(t.bat || (t.dkBat && v === t.dkBat)); }
+function apDK() {
+  const l = INFO.loai[$('#loai').value];
+  if (!l) return;
+  const v = giaTriDK(l);
+  l.truong.forEach((t, i) => {
+    document.querySelector(`[data-w="${i}"]`).style.display = anTruong(t, v) ? 'none' : '';
+    document.querySelector(`[data-r="${i}"]`).style.display = batTruong(t, v) ? '' : 'none';
+  });
+}
+function xemNgay(i) {
+  const p = document.querySelector(`[data-i="${i}"]`).value.split('-');
+  document.querySelector(`[data-d="${i}"]`).textContent = p.length === 3 ? 'Sẽ ghi vào phiếu: ngày ' + p[2] + '/' + p[1] + '/' + p[0] : '';
+}
+
+function docFile(f) {
+  return new Promise((ok, no) => {
+    const r = new FileReader();
+    r.onload = () => ok(String(r.result).split(',')[1]);
+    r.onerror = () => no(r.error);
+    r.readAsDataURL(f);
+  });
+}
+function call(fn, ...args) {
+  return new Promise((ok, no) => google.script.run.withSuccessHandler(ok).withFailureHandler(no)[fn](...args));
+}
+
+async function gui() {
+  const l = INFO.loai[$('#loai').value];
+  const meta = { nguoiGui: $('#nguoiGui').value.trim(), loaiViec: l ? l.ten : '', duAn: $('#duAn').value.trim(), goiThau: $('#goiThau').value.trim(), khai: [] };
+  const loi = [];
+  if (!meta.nguoiGui) loi.push('Người gửi');
+  if (!l) loi.push('Loại việc');
+  if (!meta.duAn) loi.push('Dự án');
+  if (l && l.goi && !meta.goiThau) loi.push('Gói thầu');
+  const files = [];
+  const dkv = l ? giaTriDK(l) : '';
+  if (l) l.truong.forEach((t, i) => {
+    if (anTruong(t, dkv)) return;
+    const bat = batTruong(t, dkv);
+    const el = document.querySelector(`[data-i="${i}"]`);
+    if (t.k === 'file') {
+      if (bat && !el.files.length) loi.push(t.nhan);
+      if (t.accept === '.pdf') for (const f of el.files) if (!/\.pdf$/i.test(f.name)) loi.push(t.nhan + ' (chỉ nhận PDF)');
+      for (const f of el.files) {
+        if (f.size > MAX_MB * 1024 * 1024) loi.push(f.name + ' (quá ' + MAX_MB + ' MB, cần nén hoặc tách file)');
+        files.push({ n: t.nhan, f: f });
+      }
+    } else {
+      let val = el.value.trim();
+      if (t.k === 'date' && val) { const p = val.split('-'); val = p[2] + '/' + p[1] + '/' + p[0]; }
+      if (bat && !val) loi.push(t.nhan);
+      meta.khai.push({ n: t.nhan, v: val });
+    }
+  });
+  if (loi.length) { $('#kq').innerHTML = '<div class="msg err">Còn thiếu: ' + loi.map(esc).join('; ') + '</div>'; return; }
+  try { localStorage.setItem('nguoiGui', meta.nguoiGui); } catch (e) {}
+  $('#gui').disabled = true; $('#kq').innerHTML = '';
+  try {
+    $('#tt').textContent = 'Đang tạo phiếu…';
+    const p = await call('taoPhieu', meta);
+    const up = [];
+    for (let k = 0; k < files.length; k++) {
+      $('#tt').textContent = `Đang tải file ${k + 1}/${files.length}: ${files[k].f.name}`;
+      const b64 = await docFile(files[k].f);
+      const id = await call('taiFile', p.folderId, files[k].f.name, files[k].f.type, b64);
+      up.push({ n: files[k].n, name: files[k].f.name, id: id });
+    }
+    $('#tt').textContent = 'Đang ghi phiếu…';
+    await call('ghiPhieu', meta, p, up);
+    $('#tt').textContent = '';
+    $('#box').innerHTML = `<div class="msg ok"><b>Đã gửi phiếu ${esc(p.ma)}</b><br>${esc(meta.loaiViec)} – ${esc(meta.duAn)}${meta.goiThau ? ' – ' + esc(meta.goiThau) : ''}<br>${up.length} file đã tải lên.</div>
+      <div style="margin-top:12px"><button onclick="ve()">Gửi phiếu khác</button></div>`;
+  } catch (e) {
+    $('#tt').textContent = '';
+    $('#kq').innerHTML = '<div class="msg err">Gửi chưa được: ' + esc(e.message || e) + '. Thử gửi lại giúp.</div>';
+    $('#gui').disabled = false;
+  }
+}
+</script>
+</body></html>

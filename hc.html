@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Hàng chờ muasamcong – BQLDA xã Củ Chi</title><style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#1d2433;--mute:#667085;--line:#e4e7ec;--pri:#1f5fa8;--pri2:#e8f0fb;--ok:#1a7f4b;--warn:#b45309;--bad:#b42318}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.45}
+header{background:var(--pri);color:#fff;padding:14px 16px}
+header h1{margin:0;font-size:17px;font-weight:600}
+header .sub{opacity:.85;font-size:13px;margin-top:2px}
+main{max-width:1100px;margin:0 auto;padding:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px}
+.muted{color:var(--mute);font-size:13px}
+label{display:block;font-weight:600;font-size:14px;margin:12px 0 4px}
+label .req{color:var(--bad)}
+input,select,textarea{width:100%;padding:10px;border:1px solid #cfd4dc;border-radius:8px;font:inherit;background:#fff}
+textarea{min-height:70px}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--pri);background:var(--pri);color:#fff;padding:10px 16px}
+button.ghost{background:#fff;color:var(--pri)}
+button:disabled{opacity:.5;cursor:default}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:8px 12px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.tabs button{background:#fff;color:var(--ink);border:1px solid var(--line);white-space:nowrap;padding:8px 12px}
+.tabs button.on{background:var(--pri);color:#fff;border-color:var(--pri)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.kpi{background:var(--pri2);border-radius:8px;padding:10px}
+.kpi .n{font-size:20px;font-weight:700}
+.kpi .l{font-size:12px;color:var(--mute)}
+.grp{border:1px solid var(--line);border-radius:10px;margin-bottom:10px;background:#fff;overflow:hidden}
+.grp>.hd{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 14px;cursor:pointer;background:#fafbfc}
+.grp>.hd b{font-size:15px}
+.grp>.hd .s{font-size:13px;color:var(--mute);text-align:right}
+.grp>.bd{display:none;padding:0 0 6px}
+.grp.open>.bd{display:block}
+.chev{transition:transform .15s;display:inline-block;margin-right:6px}
+.grp.open .chev{transform:rotate(90deg)}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th,.tbl td{border-top:1px solid var(--line);padding:8px;text-align:left;vertical-align:top}
+.tbl th{background:#f2f4f7;font-size:12px;color:var(--mute);font-weight:600}
+.tbl td.r,.tbl th.r{text-align:right;white-space:nowrap}
+.tbl tr.sub td{background:#f8fafc;font-weight:600;font-size:13px;color:var(--pri)}
+.tbl tr.click{cursor:pointer}
+.tbl tr.click:hover td{background:#f5f8ff}
+.wrap{overflow-x:auto}
+.bar{height:6px;background:#eef1f5;border-radius:3px;overflow:hidden;margin-top:4px;min-width:60px}
+.bar i{display:block;height:100%;background:var(--ok)}
+.pill{display:inline-block;padding:2px 8px;border-radius:12px;font-size:12px;background:#eef1f5;white-space:nowrap}
+.detail{background:#fbfcfe;padding:10px 12px;font-size:14px;white-space:pre-wrap;margin:0}
+.detail dt{font-weight:600;color:var(--mute);font-size:12px;margin-top:8px}
+.detail dd{margin:2px 0 0}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.right{margin-left:auto}
+.msg{padding:12px;border-radius:8px;margin-top:12px}
+.msg.ok{background:#dcfae6;color:#05603a}.msg.err{background:#fee4e2;color:#912018}
+.loading{padding:30px;text-align:center;color:var(--mute)}
+a{color:var(--pri)}
+@media (max-width:640px){.hide-sm{display:none}.tbl{font-size:13px}}
+</style>
+<script>
+// Cầu nối: trang này nằm ngoài Google nên gọi chương trình Apps Script qua mạng, không gửi tài khoản Google
+// (tránh lỗi "/u/1/ – không thể mở tệp" khi máy đăng nhập nhiều tài khoản).
+const API_URL = 'https://script.google.com/macros/s/AKfycbynHwvrBG8jBrutF-KMXoCTvcKU6AWweDvakzbMLNdDqKGR_pVjFVkfbNrcNK3rD08q/exec';
+const GET_API = {
+  getFormInfo: () => ({ api: 'form' }),
+  getTongQuan: (nam, force) => ({ api: 'tq', nam: nam || '', force: force ? '1' : '' }),
+  getHangCho: (tatCa) => ({ api: 'hc', tatCa: tatCa ? '1' : '' }),
+  getKiemTra: (force) => ({ api: 'kt', force: force ? '1' : '' })
+};
+function goiApi_(fn, args) {
+  const req = GET_API[fn]
+    ? fetch(API_URL + '?' + new URLSearchParams(GET_API[fn](...args)), { credentials: 'omit' })
+    : fetch(API_URL, { method: 'POST', credentials: 'omit', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn: fn, args: args }) });
+  return req.then(r => { if (!r.ok) throw new Error('Máy chủ trả lỗi ' + r.status); return r.json(); })
+    .then(j => { if (!j.ok) throw new Error(j.err || 'Lỗi không rõ'); return j.data; })
+    .catch(e => { throw new Error(/Failed to fetch|NetworkError|Load failed/i.test(e.message) ? 'Không kết nối được, kiểm tra mạng rồi thử lại.' : e.message); });
+}
+window.google = { script: { get run() {
+  let ok = () => {}, no = () => {};
+  const p = new Proxy({}, { get(_, k) {
+    if (k === 'withSuccessHandler') return f => { ok = f; return p; };
+    if (k === 'withFailureHandler') return f => { no = f; return p; };
+    return (...a) => { goiApi_(k, a).then(ok, no); };
+  } });
+  return p;
+} } };
+</script></head>
+<body>
+<header><h1>Hàng chờ muasamcong</h1><div class="sub" id="sub">Ban QLDA đầu tư xây dựng xã Củ Chi</div></header>
+<main>
+  <div class="card">
+    <div class="row">
+      <select id="fTT" style="max-width:200px"><option value="">Tất cả trạng thái</option></select>
+      <select id="fLoai" style="max-width:260px"><option value="">Tất cả loại việc</option></select>
+      <input id="fQ" placeholder="Tìm mã phiếu, dự án, gói…" style="max-width:260px">
+      <button class="ghost right" onclick="tai()">Làm mới</button>
+    </div>
+    <div class="kpis" id="dem" style="margin-top:10px"></div>
+  </div>
+  <div class="card" style="padding:0"><div class="wrap" id="bang"><div class="loading">Đang tải…</div></div></div>
+  <div class="card" id="an" style="display:none"></div>
+  <div class="grp" id="kt"><div class="hd" onclick="this.parentNode.classList.toggle('open')"><b><span class="chev">›</span>Số liệu cần kiểm tra trong sheet</b><span class="s" id="ktN">đang kiểm…</span></div><div class="bd" id="ktB"></div></div>
+</main>
+<script>
+let D = null, mo = {}, TATCA = false;
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const MAU = { 'Mới': '#e0ecff;color:#1f5fa8', 'Đã đăng': '#dcfae6;color:#1a7f4b', 'Đã Lưu': '#d1fadf;color:#05603a', 'Lỗi': '#fee4e2;color:#b42318', 'Thiếu hồ sơ': '#fee4e2;color:#b42318', 'Cần xác nhận': '#fef0c7;color:#b45309', 'Đang xử lý': '#fef0c7;color:#b45309', 'Hủy': '#f2f4f7;color:#98a2b3' };
+const pill = t => `<span class="pill" style="background:${MAU[t] || '#eef1f5'}">${esc(t || 'Mới')}</span>`;
+function tai() {
+  $('#bang').innerHTML = '<div class="loading">Đang tải…</div>';
+  google.script.run.withSuccessHandler(d => {
+    D = d;
+    $('#sub').textContent = 'Năm ' + d.nam + ' · cập nhật ' + d.capNhat;
+    if ($('#fTT').options.length < 2) {
+      d.trangThai.forEach(t => $('#fTT').add(new Option(t, t)));
+      d.loai.forEach(t => $('#fLoai').add(new Option(t, t)));
+    }
+    ve();
+  }).withFailureHandler(e => $('#bang').innerHTML = '<div class="msg err">' + esc(e.message) + '</div>').getHangCho(TATCA);
+  taiKT();
+}
+function taiHet() { TATCA = true; tai(); }
+function taiKT() {
+  google.script.run.withSuccessHandler(k => {
+    const ds = (k.loi || []).map(x => 'Chưa đọc được: ' + x).concat(k.ds || []);
+    $('#ktN').textContent = ds.length ? ds.length + ' dòng' : 'không có';
+    $('#ktB').innerHTML = ds.length ? '<dl class="detail">' + ds.map(x => '<dd>• ' + esc(x) + '</dd>').join('') + '</dl>' : '<div class="loading">Không phát hiện dòng nào cần sửa.</div>';
+  }).withFailureHandler(e => { $('#ktN').textContent = 'lỗi'; $('#ktB').innerHTML = '<div class="msg err">' + esc(e.message) + '</div>'; }).getKiemTra(false);
+}
+function locTT(t) { $('#fTT').value = t; ve(); }
+function ve() {
+  const tt = $('#fTT').value, lo = $('#fLoai').value, q = $('#fQ').value.toLowerCase();
+  const dem = D.dem || {};
+  $('#an').style.display = D.an ? '' : 'none';
+  $('#an').innerHTML = D.an ? `Đang ẩn ${D.an} phiếu đã xong cũ hơn. <button class="ghost" style="padding:4px 10px" onclick="taiHet()">Tải tất cả</button>` : '';
+  $('#dem').innerHTML = D.trangThai.filter(t => dem[t]).map(t => `<div class="kpi" style="cursor:pointer" onclick="locTT('${t}')"><div class="n">${dem[t]}</div><div class="l">${t}</div></div>`).join('') +
+    `<div class="kpi" style="cursor:pointer" onclick="locTT('')"><div class="n">${D.tong}</div><div class="l">Tổng phiếu</div></div>`;
+  const rows = D.rows.filter(r => (!tt || r['Trạng thái'] === tt) && (!lo || r['Loại việc'] === lo) &&
+    (!q || [r['Mã phiếu'], r['Dự án'], r['Gói thầu'], r['Người gửi']].join(' ').toLowerCase().includes(q)));
+  if (!rows.length) { $('#bang').innerHTML = '<div class="loading">Không có phiếu.</div>'; return; }
+  $('#bang').innerHTML = `<table class="tbl"><tr><th>STT</th><th>Mã phiếu</th><th>Loại việc</th><th>Dự án / Gói thầu</th><th class="hide-sm">Người gửi</th><th>Trạng thái</th></tr>` +
+    rows.map((r, i) => {
+      const k = r['Mã phiếu'];
+      return `<tr class="click" onclick="mo['${k}']=!mo['${k}'];ve()"><td>${i + 1}</td><td><b>${esc(k)}</b><div class="muted">${esc(r['Thời gian gửi'])}</div></td><td>${esc(r['Loại việc'])}</td>
+        <td>${esc(r['Dự án'])}${r['Gói thầu'] ? '<div class="muted">' + esc(r['Gói thầu']) + '</div>' : ''}</td><td class="hide-sm">${esc(r['Người gửi'])}</td>
+        <td>${pill(r['Trạng thái'])}</td></tr>` +
+        (mo[k] ? `<tr><td colspan="6"><dl class="detail">
+          ${r['Thông tin khai'] ? '<dt>Thông tin khai</dt><dd>' + esc(r['Thông tin khai']) + '</dd>' : ''}
+          <dt>File đính kèm</dt><dd>${esc(r['File đính kèm'] || '—')}${r['Thư mục file'] ? ' · <a href="' + esc(r['Thư mục file']) + '" target="_blank">Mở thư mục</a>' : ''}</dd>
+          ${r['Ghi chú xử lý'] ? '<dt>Ghi chú xử lý</dt><dd>' + esc(r['Ghi chú xử lý']) + '</dd>' : ''}
+          ${['Mã dự án (PR)', 'Mã KHLCNT (PL)', 'Mã TBMT / dự thảo', 'Mã HĐ'].filter(h => r[h]).map(h => '<dt>' + h + '</dt><dd>' + esc(r[h]) + '</dd>').join('')}
+          ${r['File đã xóa'] ? '<dt>File</dt><dd>' + esc(r['File đã xóa']) + '</dd>' : ''}
+          <dt>Cập nhật lúc</dt><dd>${esc(r['Cập nhật lúc'])}</dd></dl></td></tr>` : '');
+    }).join('') + '</table>';
+}
+['#fTT', '#fLoai'].forEach(s => $(s).onchange = ve);
+$('#fQ').oninput = () => D && ve();
+tai();
+</script>
+</body></html>
