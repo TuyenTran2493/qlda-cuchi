@@ -272,6 +272,26 @@ a{color:var(--navy2)}
 .vbt.on{background:linear-gradient(135deg,#0f2a4a,#163a63);border-color:var(--gold)}.vbt.on .vbn b{color:#fff}.vbt.on .vbn span{color:#e8d6ae}.vbt.on .vbx{color:var(--gold2)}.vbt.on .vbi{background:#fff;color:var(--gold)}
 .vbl{border-top:3px solid var(--gold)!important}.vblh{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.vblh b{color:var(--pri);font-size:16px}.vblh button{padding:5px 12px}
 .vbd .thd-h h2{display:flex;align-items:center;flex-wrap:wrap}
+
+/* Tab Biểu mẫu */
+.bmg{padding:18px 18px 0;display:grid;gap:14px}
+.bmn{font-size:13px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--gold);margin:4px 0 -4px;display:flex;align-items:center;gap:10px}
+.bmn::after{content:'';flex:1;height:1px;background:var(--goldl)}.bmn span{text-transform:none;font-weight:500;color:var(--mute);letter-spacing:0}
+.bmc{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
+.bmk{border:1px solid var(--goldl);border-radius:12px;background:linear-gradient(135deg,#fff 55%,#faf6ec);overflow:hidden;transition:box-shadow .2s,transform .2s,border-color .2s}
+.bmk:hover{box-shadow:0 8px 20px rgba(184,137,59,.2);transform:translateY(-2px);border-color:var(--gold)}
+.bmh{display:flex;gap:12px;align-items:center;padding:12px 14px;background:linear-gradient(120deg,#0f2a4a,#163a63);border-bottom:2px solid var(--gold)}
+.bmh .vbi{width:44px;height:44px;flex:none;border-radius:10px}.bmh .vbi .ico{width:24px;height:24px}
+.bmh b{color:#fff;font-size:15px;line-height:1.3}
+.bmf{display:grid;grid-template-columns:38px 1fr auto;gap:10px;align-items:center;padding:11px 14px;border-top:1px dashed #eadfc8}.bmf:first-of-type{border-top:0}
+.bmt{width:38px;height:44px;border-radius:5px;display:grid;place-items:center;font-size:11px;font-weight:800;color:#fff;position:relative}
+.bmt.hd{background:#1d4e89}.bmt.bb{background:#b8893b}.bmt::after{content:'';position:absolute;top:0;right:0;border:6px solid;border-color:#fff #fff transparent transparent;opacity:.75}
+.bmf b{display:block;font-size:14px;color:var(--pri)}.bmf span{font-size:12px;color:var(--mute)}
+.bma{display:flex;gap:6px}.bma a{font-size:13px;font-weight:600;padding:5px 11px;border-radius:8px;text-decoration:none;white-space:nowrap}
+.bma .x{border:1px solid var(--goldl);color:var(--pri);background:#fff}.bma .x:hover{border-color:var(--gold)}
+.bma .t{background:var(--pri);color:#fff;border:1px solid var(--gold)}.bma .t:hover{background:#163a63}
+.bmgc{margin:16px 18px 0;font-size:13px;color:var(--mute)}
+@media(max-width:600px){.bmc{grid-template-columns:1fr}.bmf{grid-template-columns:34px 1fr}.bma{grid-column:1/3}}
 </style>
 <script>
 // Cầu nối: trang này nằm ngoài Google nên gọi chương trình Apps Script qua mạng, không gửi tài khoản Google
@@ -308,7 +328,7 @@ window.google = { script: { get run() {
 </header>
 <div class="tabs" id="tabs">
   <button data-t="tq" class="on">Tổng quan</button><button data-t="da">Dự án</button>
-  <button data-t="ntm">NTM 2026-2030</button><button data-t="th">Trung hạn 2026–2030</button><button data-t="vb">Văn bản pháp luật</button>
+  <button data-t="ntm">NTM 2026-2030</button><button data-t="th">Trung hạn 2026–2030</button><button data-t="vb">Văn bản pháp luật</button><button data-t="bm">Biểu mẫu</button>
 </div>
 <main id="main"><div class="loading">Đang tải số liệu…</div></main>
 <script>
@@ -341,6 +361,7 @@ function grp(id, title, sum, body) {
 }
 function ve() {
   const m = $('#main');
+  if (TAB === 'bm') { m.innerHTML = veBM(); return; }
   if (!D) return;
   const loi = (D.loi || []).length ? `<div class="msg err">Chưa đọc được: ${D.loi.map(esc).join('; ')}</div>` : '';
   m.innerHTML = loi + ({ tq: veTQ, da: veDA, ntm: veNTM, th: veTH, vb: veVB }[TAB])();
@@ -931,6 +952,46 @@ function dsVB(map, order) {
 }
 function capNhatVB() { const e = document.getElementById('dsVB'); if (e) e.innerHTML = dsVB(); }
 function chonVB(k) { VBSEL = VBSEL === k ? '' : k; VBQ = ''; ve(); setTimeout(() => { const e = document.getElementById('dsVB'); if (e && VBSEL) e.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 30); }
+// ---------- BIỂU MẪU (mẫu hợp đồng, biên bản thương thảo) ----------
+// File mẫu nằm ngay trong repo (thư mục bieu-mau/), danh sách ở bieu-mau/danh-muc.json:
+// thêm mẫu mới = chép file vào bieu-mau/ và thêm một dòng vào danh-muc.json.
+let BM = null, BMQ = '', BMLOI = '';
+const ICO_BM = {
+  ks: '<path d="M3 20l5-9 4 6 3-4 6 7z"/><circle cx="17" cy="6" r="2.5"/>',
+  gs: '<circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/><path d="M8.5 11l2 2 3.5-3.5"/>',
+  tt: '<path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M9 13l2 2 4-4"/>'
+};
+function taiBM() {
+  fetch('bieu-mau/danh-muc.json', { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error('Không đọc được danh mục biểu mẫu (' + r.status + ')'); return r.json(); })
+    .then(j => { BM = j; BMLOI = ''; if (TAB === 'bm') ve(); })
+    .catch(e => { BMLOI = e.message; if (TAB === 'bm') ve(); });
+}
+function urlBM(f) { return new URL('bieu-mau/' + f, location.href).href; }
+function veBM() {
+  if (BMLOI) return '<div class="msg err">' + esc(BMLOI) + '</div>';
+  if (!BM) { taiBM(); return '<div class="loading">Đang tải biểu mẫu…</div>'; }
+  let tong = 0; BM.nhom.forEach(n => n.goi.forEach(g => tong += g.files.length));
+  return `<div class="thd vbd"><div class="thd-h"><div><h2>Mẫu hợp đồng và biên bản thương thảo <span class="vbc">${tong} mẫu</span></h2>
+      <div class="sub2">${esc(BM.ghiChu || '')} Cập nhật ${esc(BM.capNhat || '')}.</div></div>
+      <div class="thd-a"><label class="srch">${ICO.tim}<input placeholder="Tìm gói thầu, loại mẫu…" value="${esc(BMQ)}" oninput="BMQ=this.value;capNhatBM()"></label></div></div>
+    <div class="bmg" id="dsBM">${dsBM()}</div></div>`;
+}
+function dsBM() {
+  const q = boDau(BMQ.trim());
+  let out = '';
+  BM.nhom.forEach(n => {
+    const goi = n.goi.map(g => ({ g, files: g.files.filter(f => !q || boDau(n.ten + ' ' + g.ten + ' ' + f.ten).includes(q)) })).filter(x => x.files.length);
+    if (!goi.length) return;
+    out += `<div class="bmn">${esc(n.ten)} <span>${esc(n.moTa || '')}</span></div><div class="bmc">` + goi.map(({ g, files }) => `<div class="bmk">
+      <div class="bmh"><div class="vbi">${SVGI(ICO_BM[g.ma] || ICO_VB['hợp đồng'])}</div><b>${esc(g.ten)}</b></div>` +
+      files.map(f => { const u = urlBM(f.file), ten = f.file.split('/').pop();
+        return `<div class="bmf"><div class="bmt ${f.loai === 'bb' ? 'bb' : 'hd'}">${f.loai === 'bb' ? 'BB' : 'HĐ'}</div>
+        <div><b>${esc(f.ten)}</b><span>Word · ${f.kb ? f.kb.toLocaleString('vi-VN') + ' KB' : 'docx'}</span></div>
+        <div class="bma"><a class="x" target="_blank" rel="noopener" href="https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(u)}">Xem</a><a class="t" href="${esc(u)}" download="${esc(ten)}">Tải về</a></div></div>`; }).join('') + '</div>').join('') + '</div>';
+  });
+  return out || `<div class="bmgc">Không có mẫu nào khớp "${esc(BMQ)}".</div>`;
+}
+function capNhatBM() { const e = document.getElementById('dsBM'); if (e) e.innerHTML = dsBM(); }
 tai(false);
 </script>
 </body></html>

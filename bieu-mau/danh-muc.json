@@ -1,0 +1,66 @@
+{
+  "capNhat": "22/11/2026",
+  "ghiChu": "Bấm \"Xem\" để đọc ngay trên trình duyệt, \"Tải về\" để lấy file Word. Các chỗ \"…\" điền theo từng gói thầu.",
+  "nhom": [
+    {
+      "ten": "Giai đoạn chuẩn bị đầu tư",
+      "moTa": "Gói tư vấn bước lập Báo cáo kinh tế - kỹ thuật",
+      "goi": [
+        {
+          "ten": "Tư vấn khảo sát và lập Báo cáo kinh tế - kỹ thuật",
+          "ma": "ks",
+          "files": [
+            {
+              "loai": "hd",
+              "ten": "Hợp đồng",
+              "file": "cbdt/HD-khao-sat-lap-BCKTKT.docx",
+              "kb": 67
+            },
+            {
+              "loai": "bb",
+              "ten": "Biên bản hoàn thiện (thương thảo) hợp đồng",
+              "file": "cbdt/BBHT-khao-sat-lap-BCKTKT.docx",
+              "kb": 2761
+            }
+          ]
+        },
+        {
+          "ten": "Tư vấn giám sát khảo sát xây dựng",
+          "ma": "gs",
+          "files": [
+            {
+              "loai": "hd",
+              "ten": "Hợp đồng",
+              "file": "cbdt/HD-giam-sat-khao-sat.docx",
+              "kb": 69
+            },
+            {
+              "loai": "bb",
+              "ten": "Biên bản hoàn thiện (thương thảo) hợp đồng",
+              "file": "cbdt/BBHT-giam-sat-khao-sat.docx",
+              "kb": 51
+            }
+          ]
+        },
+        {
+          "ten": "Tư vấn thẩm tra Báo cáo kinh tế - kỹ thuật",
+          "ma": "tt",
+          "files": [
+            {
+              "loai": "hd",
+              "ten": "Hợp đồng",
+              "file": "cbdt/HD-tham-tra-BCKTKT.docx",
+              "kb": 66
+            },
+            {
+              "loai": "bb",
+              "ten": "Biên bản hoàn thiện (thương thảo) hợp đồng",
+              "file": "cbdt/BBHT-tham-tra-BCKTKT.docx",
+              "kb": 37
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
