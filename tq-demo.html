@@ -227,6 +227,7 @@ header button.ghost{background:transparent!important;color:var(--gold2)!importan
 .nv .pill{background:#1a3358!important;border-color:#2c4a75!important;color:#e8d6ae!important}
 .dnw svg{filter:drop-shadow(0 0 10px rgba(217,178,95,.25))!important}
 a{color:var(--navy2)}
+.cbda{padding:12px 14px}.cbda>summary{cursor:pointer;color:var(--pri);font-size:15px;padding:2px 0 8px;list-style-position:inside}.cbda .tbl td:nth-child(3){color:#163a63}.cbda .tbl td:nth-child(4){color:#912018}
 
 /* Lượt hoàn thiện: biểu tượng nét, màu đồng bộ, thẻ Tổng quan */
 .ico{display:block}.tile .ic,.gda .gt .ic{color:var(--gold)!important;background:#f7f1e4!important;border:1px solid rgba(184,137,59,.35)}
@@ -941,7 +942,37 @@ function veVB() {
   return `<div class="thd vbd"><div class="thd-h"><div><h2>Hệ thống văn bản pháp lý <span class="vbc">${V.length} văn bản</span></h2>
       <div class="sub2">Chọn lĩnh vực để xem danh sách; bấm "Chi tiết" để xem trách nhiệm của chủ đầu tư; bấm số hiệu để mở trên Thư viện pháp luật</div></div>
       <div class="thd-a"><label class="srch">${ICO.tim}<input placeholder="Tìm số hiệu, tên văn bản…" value="${esc(VBQ)}" oninput="VBQ=this.value;capNhatVB()"></label></div></div>
-    <div class="vbg">${tiles}</div></div><div id="dsVB">${dsVB(map, order)}</div>`;
+    <div class="vbg">${tiles}</div></div>${khungCBDA()}<div id="dsVB">${dsVB(map, order)}</div>`;
+}
+// Bảng tóm tắt cho giai đoạn chuẩn bị dự án (sếp yêu cầu 17/11/2026). Rà soát ngày 22/11/2026.
+const CBDA = [
+  ['Có chủ trương đầu tư đúng thẩm quyền và có vốn trước khi làm bước sau; quy mô, tổng mức đầu tư không vượt chủ trương',
+   'Luật Đầu tư công 58/2024/QH15 (sđ, bs bởi Luật 90/2025/QH15): Điều 17 – hành vi bị nghiêm cấm; NĐ 85/2025/NĐ-CP (sđ, bs bởi NĐ 275/2025/NĐ-CP)',
+   'Không giải ngân được; BLHS Điều 220 (vi phạm quy định về quyết định, lập, thẩm định chủ trương đầu tư)'],
+  ['Lập Báo cáo kinh tế - kỹ thuật (chủ đầu tư hoặc đơn vị được giao chuẩn bị dự án)',
+   'Luật Xây dựng 135/2025/QH15: khoản 1 Điều 23, Điều 25; NĐ 217/2026/NĐ-CP: Điều 30 (nội dung BCKTKT)',
+   'Hồ sơ bị trả, phải điều chỉnh dự án, chậm tiến độ giải ngân'],
+  ['Trình thẩm định đúng cơ quan; phê duyệt dự án đúng thẩm quyền',
+   'Luật Xây dựng 2025: Điều 26 (thẩm định), Điều 28 (phê duyệt, điều chỉnh dự án), Điều 38, Điều 39',
+   'Quyết định sai thẩm quyền phải hủy, làm lại; BLHS Điều 224 nếu gây hậu quả nghiêm trọng'],
+  ['Xác định nhiệm vụ tư vấn; chọn nhà thầu đủ năng lực; cung cấp tài liệu; nghiệm thu và lưu trữ hồ sơ',
+   'Luật Xây dựng 2025: Điều 40 khoản 2 điểm a, b, c, d; NĐ 212/2026/NĐ-CP (tra cứu năng lực trên Hệ thống thông tin năng lực hoạt động xây dựng)',
+   'Chủ đầu tư chịu trách nhiệm trước pháp luật và người quyết định đầu tư (Điều 40 khoản 2 điểm g); bồi thường nếu vi phạm hợp đồng (điểm đ)'],
+  ['Khảo sát xây dựng: duyệt nhiệm vụ, phương án kỹ thuật khảo sát; giám sát; nghiệm thu; phê duyệt báo cáo kết quả',
+   'Luật Xây dựng 2025: Điều 22 khoản 1, 3, 4; Điều 40',
+   'Phạt hành chính theo NĐ 339/2026/NĐ-CP Điều 17 (vi phạm của chủ đầu tư về khảo sát xây dựng); thiết kế sai kéo theo phát sinh, xuất toán'],
+  ['Xác định chi phí, dự toán, giá gói thầu',
+   'NĐ 206/2026/NĐ-CP; TT 36/2026/TT-BXD (đã đính chính bởi QĐ 1538/QĐ-BXD), TT 38/2026/TT-BXD; NĐ 214/2025/NĐ-CP Điều 18 (sđ bởi NĐ 349/2026: tối thiểu 01 báo giá)',
+   'Kiểm toán, quyết toán xuất toán, bồi hoàn; NĐ 265/2026/NĐ-CP (xử phạt lãng phí); BLHS Điều 219'],
+  ['Kế hoạch lựa chọn nhà thầu; chỉ định thầu đúng trường hợp và hạn mức; không chia nhỏ gói thầu; đăng tải thông tin đúng hạn trên muasamcong',
+   'Luật Đấu thầu 22/2023/QH15 (sđ, bs nhiều lần; Luật Đấu thầu sửa đổi có hiệu lực 01/3/2027); NĐ 214/2025/NĐ-CP (sđ bởi NĐ 165, 170, 349/2026); TT 79/2025/TT-BTC, TT 134/2026/TT-BTC',
+   'Phạt theo NĐ 122/2021/NĐ-CP (sđ bởi NĐ 288/2026/NĐ-CP); BLHS Điều 222 (vi phạm quy định về đấu thầu)']
+];
+function khungCBDA() {
+  return `<details class="card cbda" open><summary><b>Giai đoạn chuẩn bị dự án – chủ đầu tư cần nắm</b><span class="muted"> · việc phải làm, căn cứ, hậu quả nếu bỏ qua</span></summary>
+    <div class="wrap"><table class="tbl"><tr><th>STT</th><th>Việc chủ đầu tư phải làm</th><th>Căn cứ (điều, khoản)</th><th>Nếu bỏ qua hoặc làm sai</th></tr>
+    ${CBDA.map((r, i) => `<tr><td>${i + 1}</td><td><b>${esc(r[0])}</b></td><td>${esc(r[1])}</td><td>${esc(r[2])}</td></tr>`).join('')}</table></div>
+    <div class="muted" style="padding:8px 4px 2px">Rà soát ngày 22/11/2026. Xử phạt vi phạm hành chính về xây dựng theo NĐ 339/2026/NĐ-CP (thay NĐ 16/2022/NĐ-CP từ 26/8/2026), thời hiệu 02 năm. Ngưỡng truy cứu hình sự các tội trên bắt đầu từ thiệt hại 100 triệu đồng, hoặc thấp hơn nếu đã bị kỷ luật về hành vi đó mà còn vi phạm.</div></details>`;
 }
 function dsVB(map, order) {
   if (!map) { map = {}; order = []; (D.vanBan || []).forEach(x => { const k = (x.linhVuc || 'Khác').split(';')[0].trim(); if (!map[k]) { map[k] = []; order.push(k); } map[k].push(x); }); }
