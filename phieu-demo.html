@@ -71,7 +71,7 @@ header .logo svg{width:24px;height:24px}
 header .org{font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:#e8d6ae}
 header h1{margin:2px 0 0;font-size:19px;font-weight:700;color:#fff;letter-spacing:.2px}
 main{max-width:1080px;padding:18px 14px 30px;display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;align-items:start}
-@media (max-width:900px){main{grid-template-columns:1fr}aside{order:-1}}
+@media (max-width:900px){main{grid-template-columns:1fr}}
 .card{border-color:var(--goldl);border-radius:12px;padding:0;box-shadow:0 4px 16px rgba(15,42,74,.06);overflow:visible}
 #box>.loading,#box>.msg{margin:16px}
 .sec{padding:16px 20px 18px;border-top:1px solid #ece6d9}
@@ -107,6 +107,26 @@ aside .nho{font-size:12.5px;color:var(--mute);margin-top:10px;padding-top:10px;b
 .hop dl{margin:10px 20px 4px;display:grid;grid-template-columns:150px 1fr;gap:6px 12px;font-size:14px}
 .hop dt{color:var(--mute)}.hop dd{margin:0;font-weight:500;word-break:break-word}
 .hop .chan{border-radius:0 0 12px 12px;justify-content:flex-end}
+aside{display:flex;flex-direction:column;gap:14px}
+@media (min-width:901px){aside{position:sticky;top:12px}}
+.ptoi .dk{display:flex;gap:6px;margin-bottom:10px}
+.ptoi .dk select{padding:7px 8px;font-size:13.5px}
+.ptoi .dk button{padding:6px 10px;font-size:13px}
+.pt{border:1px solid #e6e0d2;border-left:4px solid #94a3b8;border-radius:8px;padding:8px 10px;margin-bottom:8px;font-size:13px;background:#fff}
+.pt .h{display:flex;justify-content:space-between;gap:6px;align-items:center}
+.pt .ma{font-weight:700;color:var(--pri)}
+.pt .tg{color:var(--mute);font-size:12px}
+.pt .nd{margin-top:3px;color:#34405a}
+.pt .gc{margin-top:4px;font-size:12.5px;color:#6b4e16;background:#fdf6e7;border-radius:6px;padding:4px 6px}
+.pt .mm{margin-top:3px;font-size:12px;color:var(--ok)}
+.tt{display:inline-block;padding:1px 8px;border-radius:10px;font-size:11.5px;font-weight:600;white-space:nowrap;background:#eef1f5;color:#475467}
+.s-moi{border-left-color:#94a3b8}.s-dang{border-left-color:#2a78d6}.s-dang .tt{background:#e6f0fb;color:#1d4e89}
+.s-luu{border-left-color:var(--gold)}.s-luu .tt{background:#f7f1e4;color:#7a5a1e}
+.s-xong{border-left-color:var(--ok)}.s-xong .tt{background:#dcfae6;color:#05603a}
+.s-can{border-left-color:var(--bad);background:#fff8f7}.s-can .tt{background:#fee4e2;color:#912018}
+.s-huy{opacity:.6}
+.ptoi .trong{font-size:13px;color:var(--mute);padding:6px 0}
+.ptoi .them{width:100%;margin-top:2px}
 @media (max-width:560px){.hop dl{grid-template-columns:1fr}.hop dt{margin-top:6px}.sec{padding:14px}.chan{padding:14px}header h1{font-size:16px}}
 </style>
 <script>
@@ -151,8 +171,14 @@ window.google = { script: { get run() {
       <li>Chọn dự án, rồi chọn gói thầu trong danh sách gợi ý để mã TBMT tự điền.</li>
       <li>Chọn loại việc, đính kèm hồ sơ (bản PDF mộc đỏ nếu có yêu cầu).</li>
       <li>Bấm <b>Gửi phiếu</b>, xem lại bảng tóm tắt rồi xác nhận.</li>
+      <li>Theo dõi tình trạng ở mục <b>Phiếu của tôi</b> bên dưới.</li>
     </ol>
     <div class="nho">Mỗi phiếu là một việc cho một gói thầu. Phiếu gửi xong vào hàng chờ, cán bộ phụ trách sẽ xử lý và cập nhật trạng thái.</div>
+  </div>
+  <div class="card ptoi" id="ptoi">
+    <h3>Phiếu của tôi</h3>
+    <div class="dk"><select id="ptTen"></select><button class="ghost" id="ptLai" title="Tải lại">↻</button></div>
+    <div id="ptDs"><div class="trong">Chọn tên để xem các phiếu đã gửi.</div></div>
   </div></aside>
 </main>
 <script>
@@ -259,7 +285,7 @@ function capNhatGoiDS() {
 const $ = s => document.querySelector(s);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-google.script.run.withSuccessHandler(info => { INFO = info; ve(); taiGoi(); })
+google.script.run.withSuccessHandler(info => { INFO = info; ve(); taiGoi(); khoiPT(); })
   .withFailureHandler(e => $('#box').innerHTML = '<div class="msg err">Lỗi tải phiếu: ' + esc(e.message) + '</div>')
   .getFormInfo();
 
@@ -286,7 +312,7 @@ function ve() {
     <div class="chan"><button id="gui" class="lon">Gửi phiếu</button><span id="tt" class="muted"></span></div>`;
   $('#loai').onchange = veTruong;
   $('#gui').onclick = gui;
-  goiY($('#nguoiGui'), () => NGUOI_GUI);
+  goiY($('#nguoiGui'), () => NGUOI_GUI, () => { const v = $('#nguoiGui').value; if (NGUOI_GUI.includes(v)) chonTenPT(v); });
   ['input', 'change'].forEach(ev => {
     $('#duAn').addEventListener(ev, () => { capNhatGoiDS(); tuDienMa(); });
     $('#goiThau').addEventListener(ev, tuDienMa);
@@ -347,6 +373,56 @@ function docFile(f) {
 }
 function call(fn, ...args) {
   return new Promise((ok, no) => google.script.run.withSuccessHandler(ok).withFailureHandler(no)[fn](...args));
+}
+
+// ===== Phiếu của tôi: theo dõi tình trạng xử lý (đọc từ tab Hàng chờ) =====
+const TT = {
+  'Mới': ['s-moi', 'Đã nhận, chờ xử lý'], 'Đang xử lý': ['s-dang', 'Đang xử lý'],
+  'Đã Lưu': ['s-luu', 'Đã nhập, chờ đăng tải'], 'Đã đăng': ['s-xong', 'Hoàn thành – đã đăng'],
+  'Cần xác nhận': ['s-luu', 'Đang chờ xác nhận'], 'Thiếu hồ sơ': ['s-can', 'Cần bổ sung hồ sơ'],
+  'Lỗi': ['s-can', 'Có vướng mắc – đang kiểm tra'], 'Hủy': ['s-huy', 'Đã hủy']
+};
+let PT = null, ptHien = 8;
+function taiPT(ep) {
+  if (PT && !ep) return veDsPT();
+  $('#ptDs').innerHTML = '<div class="trong">Đang tải…</div>';
+  google.script.run.withSuccessHandler(d => { PT = d.rows || []; veDsPT(); })
+    .withFailureHandler(e => { $('#ptDs').innerHTML = '<div class="trong">Chưa tải được: ' + esc(e.message) + '</div>'; })
+    .getHangCho(true);
+}
+function veDsPT() {
+  const ten = $('#ptTen').value;
+  if (!ten) { $('#ptDs').innerHTML = '<div class="trong">Chọn tên để xem các phiếu đã gửi.</div>'; return; }
+  const ds = PT.filter(r => chuan(r['Người gửi']) === chuan(ten))
+    .sort((a, b) => String(b['Mã phiếu']).localeCompare(String(a['Mã phiếu'])));
+  if (!ds.length) { $('#ptDs').innerHTML = '<div class="trong">Chưa có phiếu nào của ' + esc(ten) + '.</div>'; return; }
+  const can = ds.filter(r => (TT[r['Trạng thái']] || [])[0] === 's-can').length;
+  $('#ptDs').innerHTML = (can ? `<div class="luuy" style="margin:0 0 8px"><span class="i">!</span><span>Có ${can} phiếu cần anh/chị bổ sung hoặc kiểm tra.</span></div>` : '') +
+    ds.slice(0, ptHien).map(r => {
+      const t = TT[r['Trạng thái']] || ['s-moi', r['Trạng thái'] || 'Đã nhận, chờ xử lý'];
+      const ma = [r['Mã TBMT / dự thảo'] && 'TBMT: ' + r['Mã TBMT / dự thảo'], r['Mã HĐ'] && 'Mã HĐ: ' + r['Mã HĐ']].filter(Boolean).join(' · ');
+      return `<div class="pt ${t[0]}"><div class="h"><span class="ma">${esc(r['Mã phiếu'])}</span><span class="tt">${esc(t[1])}</span></div>
+        <div class="tg">${esc(r['Thời gian gửi'])}${r['Cập nhật lúc'] ? ' · cập nhật ' + esc(r['Cập nhật lúc']) : ''}</div>
+        <div class="nd"><b>${esc(r['Loại việc'])}</b> – ${esc(r['Gói thầu'] || r['Dự án'])}</div>
+        ${r['Ghi chú xử lý'] ? `<div class="gc">${esc(r['Ghi chú xử lý'])}</div>` : ''}
+        ${ma ? `<div class="mm">${esc(ma)}</div>` : ''}</div>`;
+    }).join('') +
+    (ds.length > ptHien ? `<button class="ghost them" onclick="ptHien+=10;veDsPT()">Xem thêm (${ds.length - ptHien} phiếu)</button>` : '');
+}
+function khoiPT() {
+  let ten = '';
+  try { ten = localStorage.getItem('nguoiGui') || ''; } catch (e) {}
+  const ds = NGUOI_GUI.includes(ten) || !ten ? NGUOI_GUI : [ten, ...NGUOI_GUI];
+  $('#ptTen').innerHTML = '<option value="">— Chọn tên —</option>' + ds.map(t => `<option${t === ten ? ' selected' : ''}>${esc(t)}</option>`).join('');
+  $('#ptTen').onchange = () => { ptHien = 8; taiPT(); };
+  $('#ptLai').onclick = () => taiPT(true);
+  if (ten) taiPT();
+}
+function chonTenPT(ten) {
+  const sel = $('#ptTen');
+  if (!ten || sel.value === ten) return;
+  if (![...sel.options].some(o => o.value === ten)) sel.insertAdjacentHTML('beforeend', `<option>${esc(ten)}</option>`);
+  sel.value = ten; ptHien = 8; taiPT();
 }
 
 // Bảng tóm tắt để người gửi xem lại trước khi gửi.
@@ -415,9 +491,11 @@ async function gui() {
     }
     $('#tt').textContent = 'Đang ghi phiếu…';
     await call('ghiPhieu', meta, p, up);
+    chonTenPT(meta.nguoiGui); taiPT(true);
     $('#tt').textContent = '';
     $('#box').innerHTML = `<div class="sec"><h2><span class="so">✓</span>Đã gửi phiếu ${esc(p.ma)}</h2>
-      <div class="msg ok">${esc(meta.loaiViec)} – ${esc(meta.duAn)}${meta.goiThau ? ' – ' + esc(meta.goiThau) : ''}<br>${up.length} file đã tải lên. Phiếu đã vào hàng chờ xử lý.</div></div>
+      <div class="msg ok">${esc(meta.loaiViec)} – ${esc(meta.duAn)}${meta.goiThau ? ' – ' + esc(meta.goiThau) : ''}<br>${up.length} file đã tải lên. Phiếu đã vào hàng chờ xử lý.</div>
+      <div class="luuy"><span class="i">i</span><span>Ghi lại mã phiếu <b>${esc(p.ma)}</b>. Anh/chị theo dõi tình trạng xử lý ở mục <b>Phiếu của tôi</b> trên trang này (vào lại link phiếu bất cứ lúc nào). Phiếu báo <b>Cần bổ sung hồ sơ</b> thì xem ghi chú và gửi bổ sung.</span></div></div>
       <div class="chan"><button class="lon" onclick="ve()">Gửi phiếu khác</button></div>`;
   } catch (e) {
     $('#tt').textContent = '';
