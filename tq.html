@@ -54,7 +54,7 @@ a{color:var(--pri)}
 .dash{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
 .dash>.card{margin:0}
 .c4{grid-column:span 4}.c5{grid-column:span 5}.c6{grid-column:span 6}.c7{grid-column:span 7}.c8{grid-column:span 8}.c12{grid-column:span 12}
-@media (max-width:860px){.dash>.card{grid-column:span 12}}
+@media (max-width:860px){.dash>.card,.dash>div{grid-column:span 12}}
 .ct{font-weight:700;font-size:15px}.cs{font-size:12px;color:var(--mute);margin-top:2px}
 .gauge{display:flex;align-items:center;gap:18px;margin-top:12px;flex-wrap:wrap}
 .gauge svg{flex:none}
@@ -83,10 +83,39 @@ a{color:var(--pri)}
 .tip{position:fixed;pointer-events:none;background:#1d2433;color:#fff;font-size:12px;padding:6px 9px;border-radius:6px;z-index:50;max-width:280px;display:none}
 .sv{display:flex;height:14px;border-radius:4px;overflow:hidden;margin-top:12px;gap:2px}
 .sv i{display:block;height:100%}
+.strip{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px}
+.st{border:1px solid var(--line);border-radius:10px;padding:7px 14px;background:#fff}
+.st b{display:block;font-size:19px;line-height:1.2}.st span{font-size:12px;color:var(--mute)}
+.st.warn b{color:var(--warn)}.st.click{cursor:pointer}.st.on{border-color:var(--warn);background:#fff7e6}
+.seg{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.seg button{background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:20px;padding:6px 12px;font-size:13px}
+.seg button.on{background:var(--pri);color:#fff;border-color:var(--pri)}
+.seg i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
+.fl4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) auto;gap:8px;margin-top:12px;align-items:end}
+.fl4 label{margin:0 0 2px;font-size:12px;color:var(--mute);font-weight:600}
+.fl4 select,.fl4 input{padding:8px}
+@media (max-width:760px){.fl4{grid-template-columns:1fr 1fr}.seg{margin-left:0}}
+.listc{padding:0;overflow:hidden}
+.listc .hd2{padding:10px 12px;font-size:13px;color:var(--mute);border-bottom:1px solid var(--line);background:#fafbfc}
+.listbox{max-height:calc(100vh - 150px);overflow:auto}
+@media (max-width:1000px){.listbox{max-height:none}}
+.it{padding:9px 12px;border-top:1px solid var(--line);cursor:pointer}
+.it:first-child{border-top:0}.it:hover{background:#f5f8ff}
+.it.sel{background:#fff7e6;box-shadow:inset 3px 0 0 #e3a008}
+.n1{display:flex;gap:8px;align-items:baseline}
+.n1 .no{color:var(--mute);font-size:12px;min-width:24px}.n1 .tn{flex:1;font-weight:500}
+.n1 .tm{white-space:nowrap;font-size:13px;font-weight:600}
+.n2{font-size:12px;color:var(--mute);margin:2px 0 0 32px}.n2 b{color:var(--ink);font-weight:600}
+.n3{font-size:12.5px;margin:6px 0 0 32px;color:var(--ink);line-height:1.4}
+.tag{font-size:11px;padding:1px 7px;border-radius:10px;white-space:nowrap;font-weight:600}
+.tag.BTXM{background:#e8f0fb;color:#1f5fa8}.tag.BTNN{background:#fdece4;color:#b44716}.tag.Khác{background:#eef1f5;color:#52514e}
+details.pc>summary{cursor:pointer;font-weight:700;font-size:15px;list-style:none}
+details.pc>summary::before{content:'› ';display:inline-block;transition:transform .15s}
+details.pc[open]>summary::before{transform:rotate(90deg)}
 .ntmwrap{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:12px;align-items:start}
 .ntmwrap>div>.card,.ntmwrap .grp{margin-bottom:12px}
-.ntmR .card{position:sticky;top:62px}
-#ntmmap{height:calc(100vh - 190px);min-height:380px;border-radius:8px;margin-top:10px;isolation:isolate;background:#eef1f5}
+.ntmR .card{position:sticky;top:62px;margin-bottom:0}
+#ntmmap{height:calc(100vh - 215px);min-height:380px;border-radius:8px;margin-top:10px;isolation:isolate;background:#eef1f5}
 @media (max-width:1000px){.ntmwrap{grid-template-columns:1fr}.ntmR{order:-1}.ntmR .card{position:static}#ntmmap{height:380px;min-height:0}}
 .tbl tr.sel td{background:#fff7e6!important}
 .pin{font-size:12px;color:var(--pri);white-space:nowrap}
@@ -272,7 +301,7 @@ function chiTietDA(x) {
 
 // ---------- DỰ ÁN NTM ----------
 // Lấy từ tab "Trung hạn 26-30": các dự án có nguồn vốn thuộc Chương trình xây dựng nông thôn mới (CTTH XNTM).
-let FN = { kt: '', kto: '', dv: '', q: '', loai: '' };
+let FN = { kt: '', kto: '', dv: '', q: '', loai: '', thieu: '' };
 function nhomNTM() { return D && D.trungHan ? D.trungHan.nhom.filter(g => /XNTM|NTM|nông thôn mới/i.test(g.ten)) : []; }
 function dsNTM() { return nhomNTM().reduce((a, g) => a.concat(g.duAn), []); }
 function tmNTM(x) { return x.tmdtQD || x.tmdtCT || 0; }
@@ -287,31 +316,28 @@ function demTheo(ds, k) {
 function locNTM(ds) {
   const q = FN.q.trim().toLowerCase();
   const khop = (v, f) => !f || (f === '(chưa ghi)' ? !(v || '').trim() : (v || '').trim() === f);
-  return ds.filter(x => (!FN.loai || loaiNTM(x) === FN.loai) && khop(x.kyThuat, FN.kt) && khop(x.keToan, FN.kto) && khop(x.donVi, FN.dv) &&
+  return ds.filter(x => (!FN.loai || loaiNTM(x) === FN.loai) && (!FN.thieu || !x.kyThuat || !x.keToan) && khop(x.kyThuat, FN.kt) && khop(x.keToan, FN.kto) && khop(x.donVi, FN.dv) &&
     (!q || (x.ten + ' ' + (x.quyMo || '')).toLowerCase().includes(q)));
 }
 function setFN(k, v) { FN[k] = FN[k] === v ? '' : v; if (TAB === 'ntm' && document.getElementById('ntmloai')) capNhatNTM(); else ve(); }
-function boLocNTM() { FN = { kt: '', kto: '', dv: '', q: '', loai: '' }; capNhatNTM(); }
+function boLocNTM() { FN = { kt: '', kto: '', dv: '', q: '', loai: '', thieu: '' }; capNhatNTM(); }
 function barNTM(N, k, fk) {
   const L = demTheo(N, k), mx = Math.max(...L.map(a => a[1]));
   return `<div class="hb hb2">` + L.map(([v, n]) => { const on = FN[fk] === v, cx = v === '(chưa ghi)';
     return `<div class="r" style="cursor:pointer${on ? ';background:#e8f0fb' : ''}" onclick="setFN('${fk}','${esc(v).replace(/'/g, "\\'")}')"><div class="nm"${cx ? ' style="color:var(--warn)"' : on ? ' style="font-weight:700"' : ''}>${esc(v)}</div><div class="tr"><i class="${cx ? 'w' : ''}" style="width:${n / mx * 100}%"></i></div><div class="pv">${n}</div></div>`; }).join('') + '</div>';
 }
-// Vẽ lại riêng các phần có bộ lọc, để khung bản đồ không phải tải lại mỗi lần bấm lọc.
+// Vẽ lại riêng các phần có bộ lọc, để bản đồ không phải tải lại mỗi lần bấm lọc.
 function capNhatNTM() {
   const N = dsNTM();
   const fk = k => k === 'kyThuat' ? 'kt' : k === 'keToan' ? 'kto' : 'dv';
   const opt = (k, ten) => `<div><label>${ten}</label><select onchange="FN['${fk(k)}']=this.value;capNhatNTM()"><option value="">Tất cả</option>` +
     demTheo(N, k).map(([v, n]) => `<option value="${esc(v)}" ${FN[fk(k)] === v ? 'selected' : ''}>${esc(v)} (${n})</option>`).join('') + '</select></div>';
-  document.getElementById('ntmloai').innerHTML = LOAI.map(([k, ten]) => { const ds = N.filter(x => loaiNTM(x) === k), on = FN.loai === k;
-    return `<div class="tile" style="${on ? 'border-color:var(--pri);background:#e8f0fb' : ''}" onclick="setFN('loai','${k}')"><div class="l">${k}</div><div class="v">${ds.length} <span style="font-size:14px;font-weight:400;color:var(--mute)">dự án</span></div><div class="m">${ten} · TMĐT ${tr(ds.reduce((a, x) => a + tmNTM(x), 0))}</div></div>`; }).join('');
-  document.getElementById('ntmbkt').innerHTML = barNTM(N, 'kyThuat', 'kt');
-  document.getElementById('ntmbkto').innerHTML = barNTM(N, 'keToan', 'kto');
-  const coLoc = FN.kt || FN.kto || FN.dv || FN.q || FN.loai;
-  const q = document.getElementById('ntmq');
-  if (!q) document.getElementById('ntmfl').innerHTML = `<div class="fl"><span id="ntmsel" style="display:contents"></span>
-      <div><label>Tìm tên dự án</label><input id="ntmq" placeholder="VD: đường số 23" oninput="FN.q=this.value;veDSNTM();capNhatBoLoc();toMauBanDo()"></div></div>
-    <div class="row" style="margin-top:8px"><span class="muted" id="ntmdem"></span><span class="right" id="ntmbo"></span></div>`;
+  document.getElementById('ntmloai').innerHTML = `<button class="${FN.loai ? '' : 'on'}" onclick="FN.loai='';capNhatNTM()">Tất cả ${N.length}</button>` +
+    LOAI.map(([k]) => `<button class="${FN.loai === k ? 'on' : ''}" onclick="setFN('loai','${k}')"><i style="background:${MAU[k]}"></i>${k} ${N.filter(x => loaiNTM(x) === k).length}</button>`).join('');
+  document.getElementById('ntmthieu').classList.toggle('on', !!FN.thieu);
+  const bk = document.getElementById('ntmbkt'); if (bk) { bk.innerHTML = barNTM(N, 'kyThuat', 'kt'); document.getElementById('ntmbkto').innerHTML = barNTM(N, 'keToan', 'kto'); }
+  if (!document.getElementById('ntmq')) document.getElementById('ntmfl').innerHTML = `<span id="ntmsel" style="display:contents"></span>
+      <div><label>Tìm tên dự án</label><input id="ntmq" placeholder="VD: đường số 23" oninput="FN.q=this.value;veDSNTM();capNhatBoLoc();toMauBanDo()"></div><div id="ntmbo"></div>`;
   document.getElementById('ntmq').value = FN.q;
   document.getElementById('ntmsel').innerHTML = opt('kyThuat', 'Cán bộ kỹ thuật') + opt('keToan', 'Kế toán') + opt('donVi', 'Đơn vị khảo sát');
   capNhatBoLoc();
@@ -319,8 +345,8 @@ function capNhatNTM() {
   toMauBanDo();
 }
 function capNhatBoLoc() {
-  const coLoc = FN.kt || FN.kto || FN.dv || FN.q || FN.loai;
-  document.getElementById('ntmbo').innerHTML = coLoc ? '<button class="ghost" style="padding:4px 10px" onclick="boLocNTM()">Bỏ lọc</button>' : '';
+  const coLoc = FN.kt || FN.kto || FN.dv || FN.q || FN.loai || FN.thieu;
+  document.getElementById('ntmbo').innerHTML = coLoc ? '<button class="ghost" style="padding:8px 12px" onclick="boLocNTM()">Bỏ lọc</button>' : '';
 }
 function veNTM() {
   const N = dsNTM();
@@ -329,42 +355,36 @@ function veNTM() {
   const can = N.map(x => x.ma).filter(Boolean)[0] || '';
   const tm = N.reduce((a, x) => a + tmNTM(x), 0);
   const thieu = N.filter(x => !x.kyThuat || !x.keToan).length;
-  const h = `<div class="card"><b>NTM 2026-2030</b><div class="muted">${esc(nguon)}${can ? ' · ' + esc(can) : ''} · triệu đồng</div>
-    <div class="kpis" style="margin-top:8px">
-      <div class="kpi"><div class="n">${N.length}</div><div class="l">Dự án</div></div>
-      <div class="kpi"><div class="n">${f0(tm)}</div><div class="l">Tổng mức đầu tư (${tr(tm)})</div></div>
-      <div class="kpi"><div class="n ${thieu ? 'thieu' : ''}">${thieu}</div><div class="l">Chưa ghi đủ kỹ thuật / kế toán</div></div>
-    </div>
-  </div>
-  <div class="card"><div class="ct">Phân theo loại công trình</div><div class="cs">Theo cột Quy mô · bấm ô để lọc danh sách bên dưới, bấm lại để bỏ lọc</div><div class="tiles" id="ntmloai"></div></div>
-  <div class="dash" style="margin-bottom:12px"><div class="card c6"><div class="ct">NTM 2026-2030 theo cán bộ kỹ thuật</div><div class="cs">Số dự án mỗi người phụ trách · bấm tên để lọc danh sách bên dưới</div><div id="ntmbkt"></div></div>
-    <div class="card c6"><div class="ct">NTM 2026-2030 theo kế toán</div><div class="cs">Số dự án mỗi người phụ trách · bấm tên để lọc danh sách bên dưới</div><div id="ntmbkto"></div></div></div>
-  <div class="ntmwrap"><div class="ntmL"><div class="card" id="ntmfl"></div>
-    <div class="grp open"><div class="bd" id="ntmds"></div></div></div>
-    <div class="ntmR"><div class="card"><div class="row"><div><div class="ct">Bản đồ công trình NTM xã Củ Chi</div><div class="cs">Bấm một dự án trong danh sách để xem vị trí · bấm tuyến trên bản đồ để xem thông tin</div></div>
+  const h = `<div class="card"><div class="ct">NTM 2026-2030</div><div class="cs">${esc(nguon)}${can ? ' · ' + esc(can) : ''}</div>
+    <div class="strip"><div class="st"><b>${N.length}</b><span>dự án</span></div><div class="st"><b>${tr(tm)}</b><span>tổng mức đầu tư</span></div>
+      ${thieu ? `<div class="st warn click" id="ntmthieu" onclick="setFN('thieu','1')" title="Bấm để lọc"><b>${thieu}</b><span>chưa ghi đủ người phụ trách</span></div>` : '<span id="ntmthieu"></span>'}
+      <div class="seg" id="ntmloai"></div></div>
+    <div class="fl4" id="ntmfl"></div></div>
+  <div class="ntmwrap"><div class="ntmL"><div class="card listc"><div class="hd2" id="ntmdem"></div><div class="listbox" id="ntmds"></div></div></div>
+    <div class="ntmR"><div class="card"><div class="row"><div class="ct">Bản đồ công trình</div>
       <a class="right" href="https://www.google.com/maps/d/viewer?mid=1XmDjYsP9y_6OLt5fUA67kOKnhOoVFYk" target="_blank" style="font-size:13px">Mở Google My Maps ↗</a></div>
       <div id="ntmmap"><div class="loading">Đang tải bản đồ…</div></div>
-      <div class="lgm"><span><i style="background:#2a78d6"></i>BTXM</span><span><i style="background:#eb6834"></i>BTNN</span><span><i style="background:#7a7a75"></i>Khác / chưa khớp danh mục</span><span><i style="background:#e3a008;height:7px"></i>Đang chọn</span><span id="ntmmapn"></span></div></div></div></div>`;
+      <div class="lgm"><span><i style="background:#2a78d6"></i>BTXM</span><span><i style="background:#eb6834"></i>BTNN</span><span><i style="background:#7a7a75"></i>Khác / chưa khớp</span><span><i style="background:#e3a008;height:7px"></i>Đang chọn</span><span id="ntmmapn"></span></div></div></div></div>
+  <details class="card pc"><summary>Phân công cán bộ kỹ thuật, kế toán</summary><div class="cs" style="margin:4px 0 0">Bấm tên để lọc danh sách và bản đồ</div>
+    <div class="dash" style="margin-top:8px"><div class="c6"><div class="ct" style="font-size:14px">Cán bộ kỹ thuật</div><div id="ntmbkt"></div></div>
+    <div class="c6"><div class="ct" style="font-size:14px">Kế toán</div><div id="ntmbkto"></div></div></div></details>`;
   setTimeout(() => { capNhatNTM(); veBanDo(); }, 0);
   return h;
 }
 function veDSNTM() {
   const box = document.getElementById('ntmds'); if (!box) return;
   const L = locNTM(dsNTM()), tmL = L.reduce((a, x) => a + tmNTM(x), 0);
-  document.getElementById('ntmdem').textContent = `Đang hiện ${L.length} dự án · TMĐT ${f0(tmL)} triệu đồng`;
+  document.getElementById('ntmdem').textContent = `${L.length} dự án · TMĐT ${f0(tmL)} triệu đồng · bấm dự án để xem vị trí`;
   if (!L.length) { box.innerHTML = '<div class="loading">Không có dự án phù hợp.</div>'; return; }
-  let h = `<div class="wrap"><table class="tbl"><tr><th>STT</th><th>Tên dự án</th><th class="r">TMĐT</th><th>Phụ trách</th></tr>`;
-  L.forEach((x, i) => {
-    const id = 'ntm_' + (x.ten || i), q = esc(x.ten).replace(/'/g, "\\'");
-    const kt = x.kyThuat ? esc(x.kyThuat) : '<span class="thieu">chưa ghi</span>';
-    const kto = x.keToan ? esc(x.keToan) : '<span class="thieu">chưa ghi</span>';
-    const coBD = MAPIDX ? !!MAPIDX[x.ten] : null;
-    const pin = coBD === null ? '' : coBD ? '<div class="pin">📍 xem trên bản đồ</div>' : '<div class="pin no">chưa có trên bản đồ</div>';
-    h += `<tr class="click ${SEL === x.ten ? 'sel' : ''}" onclick="chonNTM('${q}', true)"><td>${i + 1}</td><td>${esc(x.ten)} <span class="pill">${loaiNTM(x)}</span>${pin}</td><td class="r">${f0(tmNTM(x))}<div class="muted">${esc(x.tg || x.tgCT)}</div></td>` +
-      `<td style="white-space:nowrap"><div class="who">KS: <b>${x.donVi ? esc(x.donVi) : '<span class="thieu">chưa ghi</span>'}</b></div><div class="who">KT: <b>${kt}</b></div><div class="who">KTo: <b>${kto}</b></div></td></tr>`;
-    if (ROW[id]) h += `<tr class="sel"><td colspan="4"><dl class="detail">${[['Loại', loaiNTM(x)], ['Quy mô', x.quyMo], ['Căn cứ', x.ma], ['Chủ trương đầu tư', x.chuTruong], ['QĐ đầu tư', x.qdDT], ['Thời gian KC–HT', x.tg || x.tgCT], ['Đơn vị thực hiện khảo sát', x.donVi], ['Cán bộ kỹ thuật', x.kyThuat], ['Kế toán', x.keToan], ['Ghi chú', x.ghiChu]].filter(a => a[1]).map(a => `<dt>${esc(a[0])}</dt><dd>${esc(a[1])}</dd>`).join('')}</dl></td></tr>`;
-  });
-  box.innerHTML = h + '</table></div><div class="muted" style="padding:8px 12px">KS: đơn vị khảo sát · KT: cán bộ kỹ thuật · KTo: kế toán · bấm dòng để xem chi tiết và vị trí trên bản đồ</div>';
+  const ten = v => v ? `<b>${esc(v)}</b>` : '<b style="color:var(--warn)">chưa ghi</b>';
+  box.innerHTML = L.map((x, i) => {
+    const q = esc(x.ten).replace(/'/g, "\\'"), sel = SEL === x.ten, lo = loaiNTM(x);
+    const khongBD = MAPIDX && !MAPIDX[x.ten] ? ' · <span style="color:var(--warn)">chưa có trên bản đồ</span>' : '';
+    return `<div class="it ${sel ? 'sel' : ''}" data-ten="${esc(x.ten)}" onclick="chonNTM('${q}', true)">
+      <div class="n1"><span class="no">${i + 1}</span><span class="tn">${esc(x.ten)}</span><span class="tag ${lo}">${lo}</span><span class="tm">${f0(tmNTM(x))} tr</span></div>
+      <div class="n2">KS ${ten(x.donVi)} · KT ${ten(x.kyThuat)} · KTo ${ten(x.keToan)} · ${esc(x.tg || x.tgCT)}${khongBD}</div>
+      ${sel && x.quyMo ? `<div class="n3">${esc(x.quyMo)}</div>` : ''}</div>`;
+  }).join('');
 }
 
 // ---------- BẢN ĐỒ NTM (đọc trực tiếp từ Google My Maps, tự cập nhật khi bản đồ được sửa) ----------
@@ -430,7 +450,7 @@ function veBanDo() {
       const info = x ? `<b>${esc(x.ten)}</b><br>${loaiNTM(x)} · TMĐT ${f0(tmNTM(x))} triệu<br>KS: ${esc(x.donVi || 'chưa ghi')} · KT: ${esc(x.kyThuat || 'chưa ghi')} · KTo: ${esc(x.keToan || 'chưa ghi')}`
         : `<b>${esc(k.ten.replace(/^\s*\d+\s*-\s*/, ''))}</b><br><span style="color:#667085">Chưa khớp với danh mục NTM trong file</span>`;
       g.bindPopup(info);
-      g.on('click', () => { if (x) { SEL = x.ten; veDSNTM(); toMauBanDo(); } });
+      g.on('click', () => { if (x) chonNTM(x.ten, false); });
       g.addTo(MAP);
       const o = { g, x, loai };
       if (x) (MAPIDX[x.ten] = MAPIDX[x.ten] || []).push(o);
@@ -446,7 +466,7 @@ function veBanDo() {
 }
 function toMauBanDo() {
   if (!MAP || !LAYERS.length) return;
-  const coLoc = FN.kt || FN.kto || FN.dv || FN.q || FN.loai;
+  const coLoc = FN.kt || FN.kto || FN.dv || FN.q || FN.loai || FN.thieu;
   const hien = new Set(locNTM(dsNTM()).map(x => x.ten));
   LAYERS.forEach(o => {
     const chon = o.x && o.x.ten === SEL, trong = o.x ? hien.has(o.x.ten) : !coLoc;
@@ -456,9 +476,10 @@ function toMauBanDo() {
   });
 }
 function chonNTM(ten, tuDanhSach) {
-  const id = 'ntm_' + ten;
-  if (tuDanhSach) ROW[id] = SEL === ten ? !ROW[id] : true;
-  SEL = ten; veDSNTM(); toMauBanDo();
+  SEL = (tuDanhSach && SEL === ten) ? null : ten;
+  veDSNTM(); toMauBanDo();
+  if (!SEL) { if (MAP) MAP.closePopup(); return; }
+  if (!tuDanhSach) { const el = [...document.querySelectorAll('#ntmds .it')].find(e => e.dataset.ten === ten); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
   const ds = MAPIDX && MAPIDX[ten];
   if (MAP && ds && ds.length) {
     const g = L.featureGroup(ds.map(o => o.g));
