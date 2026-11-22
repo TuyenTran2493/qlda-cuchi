@@ -213,6 +213,7 @@ function ve() {
     <select id="loai"><option value="">— Chọn loại việc —</option>${INFO.loai.map((l, i) => `<option value="${i}">${esc(l.ten)}</option>`).join('')}</select>
     <label>Dự án <span class="req">*</span></label>
     <input id="duAn" list="dsDuAn" placeholder="Gõ để tìm, hoặc ghi tên dự án">
+    <div class="ghichu" style="color:var(--warn)">Tên dự án hiện sẵn lấy theo Nghị quyết của dự án. Nếu sau khi duyệt dự án tên bị thay đổi, vui lòng báo quản trị để điều chỉnh tên.</div>
     <datalist id="dsDuAn">${INFO.duAn.map(d => `<option value="${esc(d)}">`).join('')}</datalist>
     <label>Gói thầu <span class="req" id="goiReq" style="display:none">*</span></label><input id="goiThau" list="dsGoi" placeholder="Tên gói thầu (ghi đúng như trong quyết định)"><datalist id="dsGoi"></datalist>
     <div id="truong"></div>
