@@ -83,6 +83,16 @@ a{color:var(--pri)}
 .tip{position:fixed;pointer-events:none;background:#1d2433;color:#fff;font-size:12px;padding:6px 9px;border-radius:6px;z-index:50;max-width:280px;display:none}
 .sv{display:flex;height:14px;border-radius:4px;overflow:hidden;margin-top:12px;gap:2px}
 .sv i{display:block;height:100%}
+.ntmwrap{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:12px;align-items:start}
+.ntmwrap>div>.card,.ntmwrap .grp{margin-bottom:12px}
+.ntmR .card{position:sticky;top:62px}
+#ntmmap{height:calc(100vh - 190px);min-height:380px;border-radius:8px;margin-top:10px;isolation:isolate;background:#eef1f5}
+@media (max-width:1000px){.ntmwrap{grid-template-columns:1fr}.ntmR{order:-1}.ntmR .card{position:static}#ntmmap{height:380px;min-height:0}}
+.tbl tr.sel td{background:#fff7e6!important}
+.pin{font-size:12px;color:var(--pri);white-space:nowrap}
+.pin.no{color:var(--mute)}
+.lgm{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--mute);margin-top:8px}
+.lgm i{display:inline-block;width:16px;height:4px;border-radius:2px;margin-right:4px;vertical-align:middle}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
 .chip{border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;font-size:13px}
 .chip.on{background:var(--pri);color:#fff;border-color:var(--pri)}
@@ -300,12 +310,13 @@ function capNhatNTM() {
   const coLoc = FN.kt || FN.kto || FN.dv || FN.q || FN.loai;
   const q = document.getElementById('ntmq');
   if (!q) document.getElementById('ntmfl').innerHTML = `<div class="fl"><span id="ntmsel" style="display:contents"></span>
-      <div><label>Tìm tên dự án</label><input id="ntmq" placeholder="VD: đường số 23" oninput="FN.q=this.value;veDSNTM();capNhatBoLoc()"></div></div>
+      <div><label>Tìm tên dự án</label><input id="ntmq" placeholder="VD: đường số 23" oninput="FN.q=this.value;veDSNTM();capNhatBoLoc();toMauBanDo()"></div></div>
     <div class="row" style="margin-top:8px"><span class="muted" id="ntmdem"></span><span class="right" id="ntmbo"></span></div>`;
   document.getElementById('ntmq').value = FN.q;
   document.getElementById('ntmsel').innerHTML = opt('kyThuat', 'Cán bộ kỹ thuật') + opt('keToan', 'Kế toán') + opt('donVi', 'Đơn vị khảo sát');
   capNhatBoLoc();
   veDSNTM();
+  toMauBanDo();
 }
 function capNhatBoLoc() {
   const coLoc = FN.kt || FN.kto || FN.dv || FN.q || FN.loai;
@@ -326,14 +337,15 @@ function veNTM() {
     </div>
   </div>
   <div class="card"><div class="ct">Phân theo loại công trình</div><div class="cs">Theo cột Quy mô · bấm ô để lọc danh sách bên dưới, bấm lại để bỏ lọc</div><div class="tiles" id="ntmloai"></div></div>
-  <div class="card"><div class="row"><div><div class="ct">Bản đồ công trình NTM xã Củ Chi</div><div class="cs">Theo bản đồ "Theo dõi công trình nông thôn mới xã Củ Chi" trên Google My Maps · bấm vào tuyến để xem tên</div></div>
-    <a class="right" href="https://www.google.com/maps/d/viewer?mid=1XmDjYsP9y_6OLt5fUA67kOKnhOoVFYk&ll=10.959270950258373%2C106.55813590505828&z=13" target="_blank" style="font-size:13px">Mở bản đồ lớn ↗</a></div>
-    <iframe src="https://www.google.com/maps/d/embed?mid=1XmDjYsP9y_6OLt5fUA67kOKnhOoVFYk&ll=10.959270950258373%2C106.55813590505828&z=13" loading="lazy" style="width:100%;height:min(520px,70vh);border:0;border-radius:8px;margin-top:10px" title="Bản đồ công trình NTM xã Củ Chi"></iframe></div>
   <div class="dash" style="margin-bottom:12px"><div class="card c6"><div class="ct">NTM 2026-2030 theo cán bộ kỹ thuật</div><div class="cs">Số dự án mỗi người phụ trách · bấm tên để lọc danh sách bên dưới</div><div id="ntmbkt"></div></div>
     <div class="card c6"><div class="ct">NTM 2026-2030 theo kế toán</div><div class="cs">Số dự án mỗi người phụ trách · bấm tên để lọc danh sách bên dưới</div><div id="ntmbkto"></div></div></div>
-  <div class="card" id="ntmfl"></div>
-  <div class="grp open"><div class="bd" id="ntmds"></div></div>`;
-  setTimeout(capNhatNTM, 0);
+  <div class="ntmwrap"><div class="ntmL"><div class="card" id="ntmfl"></div>
+    <div class="grp open"><div class="bd" id="ntmds"></div></div></div>
+    <div class="ntmR"><div class="card"><div class="row"><div><div class="ct">Bản đồ công trình NTM xã Củ Chi</div><div class="cs">Bấm một dự án trong danh sách để xem vị trí · bấm tuyến trên bản đồ để xem thông tin</div></div>
+      <a class="right" href="https://www.google.com/maps/d/viewer?mid=1XmDjYsP9y_6OLt5fUA67kOKnhOoVFYk" target="_blank" style="font-size:13px">Mở Google My Maps ↗</a></div>
+      <div id="ntmmap"><div class="loading">Đang tải bản đồ…</div></div>
+      <div class="lgm"><span><i style="background:#2a78d6"></i>BTXM</span><span><i style="background:#eb6834"></i>BTNN</span><span><i style="background:#7a7a75"></i>Khác / chưa khớp danh mục</span><span><i style="background:#e3a008;height:7px"></i>Đang chọn</span><span id="ntmmapn"></span></div></div></div></div>`;
+  setTimeout(() => { capNhatNTM(); veBanDo(); }, 0);
   return h;
 }
 function veDSNTM() {
@@ -341,16 +353,119 @@ function veDSNTM() {
   const L = locNTM(dsNTM()), tmL = L.reduce((a, x) => a + tmNTM(x), 0);
   document.getElementById('ntmdem').textContent = `Đang hiện ${L.length} dự án · TMĐT ${f0(tmL)} triệu đồng`;
   if (!L.length) { box.innerHTML = '<div class="loading">Không có dự án phù hợp.</div>'; return; }
-  let h = `<div class="wrap"><table class="tbl"><tr><th>STT</th><th>Tên dự án</th><th class="r">TMĐT</th><th class="hide-sm">KC–HT</th><th>Phụ trách</th></tr>`;
+  let h = `<div class="wrap"><table class="tbl"><tr><th>STT</th><th>Tên dự án</th><th class="r">TMĐT</th><th>Phụ trách</th></tr>`;
   L.forEach((x, i) => {
-    const id = 'ntm_' + (x.ten || i);
+    const id = 'ntm_' + (x.ten || i), q = esc(x.ten).replace(/'/g, "\\'");
     const kt = x.kyThuat ? esc(x.kyThuat) : '<span class="thieu">chưa ghi</span>';
     const kto = x.keToan ? esc(x.keToan) : '<span class="thieu">chưa ghi</span>';
-    h += `<tr class="click" onclick="ROW['${esc(id).replace(/'/g, "\\'")}']=!ROW['${esc(id).replace(/'/g, "\\'")}'];veDSNTM()"><td>${i + 1}</td><td>${esc(x.ten)} <span class="pill">${loaiNTM(x)}</span></td><td class="r">${f0(tmNTM(x))}</td><td class="hide-sm" style="white-space:nowrap">${esc(x.tg || x.tgCT)}</td>` +
+    const coBD = MAPIDX ? !!MAPIDX[x.ten] : null;
+    const pin = coBD === null ? '' : coBD ? '<div class="pin">📍 xem trên bản đồ</div>' : '<div class="pin no">chưa có trên bản đồ</div>';
+    h += `<tr class="click ${SEL === x.ten ? 'sel' : ''}" onclick="chonNTM('${q}', true)"><td>${i + 1}</td><td>${esc(x.ten)} <span class="pill">${loaiNTM(x)}</span>${pin}</td><td class="r">${f0(tmNTM(x))}<div class="muted">${esc(x.tg || x.tgCT)}</div></td>` +
       `<td style="white-space:nowrap"><div class="who">KS: <b>${x.donVi ? esc(x.donVi) : '<span class="thieu">chưa ghi</span>'}</b></div><div class="who">KT: <b>${kt}</b></div><div class="who">KTo: <b>${kto}</b></div></td></tr>`;
-    if (ROW[id]) h += `<tr><td colspan="5"><dl class="detail">${[['Loại', loaiNTM(x)], ['Quy mô', x.quyMo], ['Căn cứ', x.ma], ['Chủ trương đầu tư', x.chuTruong], ['QĐ đầu tư', x.qdDT], ['Thời gian KC–HT', x.tg || x.tgCT], ['Đơn vị thực hiện khảo sát', x.donVi], ['Cán bộ kỹ thuật', x.kyThuat], ['Kế toán', x.keToan], ['Ghi chú', x.ghiChu]].filter(a => a[1]).map(a => `<dt>${esc(a[0])}</dt><dd>${esc(a[1])}</dd>`).join('')}</dl></td></tr>`;
+    if (ROW[id]) h += `<tr class="sel"><td colspan="4"><dl class="detail">${[['Loại', loaiNTM(x)], ['Quy mô', x.quyMo], ['Căn cứ', x.ma], ['Chủ trương đầu tư', x.chuTruong], ['QĐ đầu tư', x.qdDT], ['Thời gian KC–HT', x.tg || x.tgCT], ['Đơn vị thực hiện khảo sát', x.donVi], ['Cán bộ kỹ thuật', x.kyThuat], ['Kế toán', x.keToan], ['Ghi chú', x.ghiChu]].filter(a => a[1]).map(a => `<dt>${esc(a[0])}</dt><dd>${esc(a[1])}</dd>`).join('')}</dl></td></tr>`;
   });
-  box.innerHTML = h + '</table></div><div class="muted" style="padding:8px 12px">KS: đơn vị khảo sát · KT: cán bộ kỹ thuật · KTo: kế toán · bấm dòng để xem chi tiết</div>';
+  box.innerHTML = h + '</table></div><div class="muted" style="padding:8px 12px">KS: đơn vị khảo sát · KT: cán bộ kỹ thuật · KTo: kế toán · bấm dòng để xem chi tiết và vị trí trên bản đồ</div>';
+}
+
+// ---------- BẢN ĐỒ NTM (đọc trực tiếp từ Google My Maps, tự cập nhật khi bản đồ được sửa) ----------
+const KML_URL = 'https://www.google.com/maps/d/kml?mid=1XmDjYsP9y_6OLt5fUA67kOKnhOoVFYk&forcekml=1';
+let KML = null, MAP = null, LAYERS = [], MAPIDX = null, SEL = null;
+const MAU = { BTXM: '#2a78d6', BTNN: '#eb6834', 'Khác': '#7a7a75' };
+const STOPW = new Set(['sua', 'chua', 'nang', 'cap', 'tuyen', 'duong', 'so', 'hem', 'va', 'cai', 'tao', 'xay', 'dung', 'dau', 'tu', 'he', 'thong', 'thoat', 'nuoc', 'tai', 'lap', 'mat', 'diem', 'cuoi', 'noi', 'dai', 'doan', 'den', 'phia', 'sau']);
+function tuKhoa(s) {
+  s = String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').replace(/^\s*\d+\s*-\s*/, '').replace(/\(.*?\)/g, ' ');
+  s = s.replace(/(^|[\s,;-])(ap|xom)(?=[\s\da-z])[\s\S]*$/, '');
+  return s.replace(/[^a-z0-9\/]+/g, ' ').trim().split(' ').filter(w => w && !STOPW.has(w));
+}
+function khopTen(a, K) {
+  const sc = (p, q) => { const A = new Set(p), B = new Set(q); let n = 0; A.forEach(x => B.has(x) && n++); return n / Math.max(A.size, B.size, 1); };
+  const so = p => p.filter(w => /\d/.test(w)), chu = p => p.filter(w => !/\d/.test(w));
+  let best = -1, bs = 0;
+  K.forEach((b, i) => {
+    let v;
+    if (so(a).sort().join() === so(b).sort().join()) v = sc(a, b);
+    else v = so(a).length === so(b).length && so(a).some(x => so(b).includes(x)) ? sc(chu(a), chu(b)) * 0.8 : 0;
+    if (v > bs) { bs = v; best = i; }
+  });
+  return bs >= 0.5 ? best : -1;
+}
+function napLeaflet() {
+  if (window.L) return Promise.resolve();
+  return new Promise((ok, no) => {
+    const c = document.createElement('link'); c.rel = 'stylesheet'; c.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'; document.head.appendChild(c);
+    const j = document.createElement('script'); j.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'; j.onload = ok; j.onerror = () => no(new Error('không tải được thư viện bản đồ')); document.head.appendChild(j);
+  });
+}
+function taiKML() {
+  if (KML) return Promise.resolve(KML);
+  return fetch(KML_URL, { credentials: 'omit' }).then(r => { if (!r.ok) throw new Error('Google My Maps trả lỗi ' + r.status); return r.text(); }).then(t => {
+    const d = new DOMParser().parseFromString(t, 'text/xml');
+    const toaDo = el => el.getElementsByTagName('coordinates')[0].textContent.trim().split(/\s+/).map(p => { const a = p.split(','); return [+a[1], +a[0]]; });
+    KML = [...d.getElementsByTagName('Placemark')].map(p => {
+      const fol = p.parentNode && p.parentNode.getElementsByTagName('name')[0] ? p.parentNode.getElementsByTagName('name')[0].textContent : '';
+      return { ten: ((p.getElementsByTagName('name')[0] || {}).textContent || '').trim(), fol: fol,
+        lines: [...p.getElementsByTagName('LineString')].map(toaDo), pts: [...p.getElementsByTagName('Point')].map(e => toaDo(e)[0]),
+        polys: [...p.getElementsByTagName('Polygon')].map(toaDo) };
+    });
+    return KML;
+  });
+}
+function veBanDo() {
+  const el = document.getElementById('ntmmap'); if (!el) return;
+  Promise.all([napLeaflet(), taiKML()]).then(() => {
+    if (!document.getElementById('ntmmap') || document.getElementById('ntmmap') !== el) return;
+    el.innerHTML = '';
+    if (MAP) { MAP.remove(); MAP = null; }
+    MAP = L.map(el, { zoomControl: true });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(MAP);
+    const N = dsNTM(), K = N.map(x => tuKhoa(x.ten));
+    MAPIDX = {};
+    LAYERS = KML.map(k => {
+      const i = khopTen(tuKhoa(k.ten), K), x = i >= 0 ? N[i] : null;
+      const loai = x ? loaiNTM(x) : /NHỰA/i.test(k.fol) ? 'BTNN' : /XI MĂNG/i.test(k.fol) ? 'BTXM' : 'Khác';
+      const g = L.featureGroup();
+      k.lines.forEach(c => L.polyline(c).addTo(g));
+      k.polys.forEach(c => L.polygon(c).addTo(g));
+      k.pts.forEach(c => L.circleMarker(c, { radius: 6 }).addTo(g));
+      const info = x ? `<b>${esc(x.ten)}</b><br>${loaiNTM(x)} · TMĐT ${f0(tmNTM(x))} triệu<br>KS: ${esc(x.donVi || 'chưa ghi')} · KT: ${esc(x.kyThuat || 'chưa ghi')} · KTo: ${esc(x.keToan || 'chưa ghi')}`
+        : `<b>${esc(k.ten.replace(/^\s*\d+\s*-\s*/, ''))}</b><br><span style="color:#667085">Chưa khớp với danh mục NTM trong file</span>`;
+      g.bindPopup(info);
+      g.on('click', () => { if (x) { SEL = x.ten; veDSNTM(); toMauBanDo(); } });
+      g.addTo(MAP);
+      const o = { g, x, loai };
+      if (x) (MAPIDX[x.ten] = MAPIDX[x.ten] || []).push(o);
+      return o;
+    });
+    const all = L.featureGroup(LAYERS.map(o => o.g));
+    if (all.getLayers().length) MAP.fitBounds(all.getBounds(), { padding: [20, 20] });
+    const n = Object.keys(MAPIDX).length;
+    document.getElementById('ntmmapn').textContent = `· ${n}/${N.length} dự án đã có trên bản đồ`;
+    toMauBanDo(); veDSNTM();
+    setTimeout(() => MAP && MAP.invalidateSize(), 200);
+  }).catch(e => { el.innerHTML = `<div class="msg err">Không tải được bản đồ: ${esc(e.message)}. <a href="https://www.google.com/maps/d/viewer?mid=1XmDjYsP9y_6OLt5fUA67kOKnhOoVFYk" target="_blank">Mở Google My Maps</a></div>`; });
+}
+function toMauBanDo() {
+  if (!MAP || !LAYERS.length) return;
+  const coLoc = FN.kt || FN.kto || FN.dv || FN.q || FN.loai;
+  const hien = new Set(locNTM(dsNTM()).map(x => x.ten));
+  LAYERS.forEach(o => {
+    const chon = o.x && o.x.ten === SEL, trong = o.x ? hien.has(o.x.ten) : !coLoc;
+    const st = chon ? { color: '#e3a008', weight: 9, opacity: 1, fillOpacity: .6 } : { color: MAU[o.loai], weight: 4, opacity: trong ? .9 : .12, fillOpacity: trong ? .4 : .05 };
+    o.g.setStyle(st);
+    if (chon) o.g.bringToFront();
+  });
+}
+function chonNTM(ten, tuDanhSach) {
+  const id = 'ntm_' + ten;
+  if (tuDanhSach) ROW[id] = SEL === ten ? !ROW[id] : true;
+  SEL = ten; veDSNTM(); toMauBanDo();
+  const ds = MAPIDX && MAPIDX[ten];
+  if (MAP && ds && ds.length) {
+    const g = L.featureGroup(ds.map(o => o.g));
+    MAP.fitBounds(g.getBounds(), { maxZoom: 17, padding: [40, 40] });
+    ds[0].g.openPopup(g.getBounds().getCenter());
+    if (tuDanhSach && innerWidth <= 1000) document.getElementById('ntmmap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
 }
 
 // ---------- TRUNG HẠN ----------
