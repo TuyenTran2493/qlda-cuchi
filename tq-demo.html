@@ -266,13 +266,9 @@ function veTQ() {
   }
   return h + '</div>';
 }
-// Dự án đầu tư công trong năm có thuộc NTM không: theo nguồn vốn, nếu không ghi thì so tên với danh mục NTM 2026-2030
-let LOCGN = '', _ntmK = null;
-function laNTM(x) {
-  if (/XNTM|NTM|nông thôn mới/i.test(x.nguonVon || '')) return true;
-  if (!_ntmK || _ntmK.d !== D) _ntmK = { d: D, k: dsNTM().map(y => tuKhoa(y.ten)) };
-  return _ntmK.k.length ? khopTen(tuKhoa(x.ten), _ntmK.k) >= 0 : false;
-}
+// Dự án đầu tư công trong năm thuộc NTM: nhận theo cột Nguồn vốn của tab Tiến độ (có chữ NTM / XNTM / nông thôn mới)
+let LOCGN = '';
+function laNTM(x) { return /XNTM|NTM|nông thôn mới/i.test(x.nguonVon || ''); }
 function chuyen(t) { document.querySelector(`#tabs button[data-t="${t}"]`).click(); }
 function moNhom(k) { OPEN['g_' + k] = true; chuyen('da'); setTimeout(() => { const e = document.getElementById('g_' + k); if (e) e.scrollIntoView(); }, 50); }
 
