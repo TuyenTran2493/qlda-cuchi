@@ -128,7 +128,7 @@ window.google = { script: { get run() {
 </header>
 <div class="tabs" id="tabs">
   <button data-t="tq" class="on">Tổng quan</button><button data-t="da">Dự án</button>
-  <button data-t="ntm">Dự án NTM</button><button data-t="th">Trung hạn 2026–2030</button><button data-t="vb">Văn bản pháp luật</button>
+  <button data-t="ntm">NTM 2026-2030</button><button data-t="th">Trung hạn 2026–2030</button><button data-t="vb">Văn bản pháp luật</button>
 </div>
 <main id="main"><div class="loading">Đang tải số liệu…</div></main>
 <script>
@@ -199,7 +199,7 @@ function veTQ() {
   const IC = { dtc: '🏗', ctx: '🛠', pctt: '🌊' };
   NHOM.forEach(k => { const s = sumNhom(k); tiles.push([`moNhom('${k}')`, IC[k], s.n, D.tienDo.nhom[k].ten, s.tmdt ? 'TMĐT ' + tr(s.tmdt) : '']); });
   const N = dsNTM();
-  if (N.length) tiles.push([`chuyen('ntm')`, '🌾', N.length, 'Nông thôn mới', 'TMĐT ' + tr(N.reduce((a, x) => a + tmNTM(x), 0))]);
+  if (N.length) tiles.push([`chuyen('ntm')`, '🌾', N.length, 'NTM 2026-2030', 'TMĐT ' + tr(N.reduce((a, x) => a + tmNTM(x), 0))]);
   if (D.trungHan && D.trungHan.tong) tiles.push([`chuyen('th')`, '📋', D.trungHan.nhom.reduce((a, g) => a + g.duAn.length, 0), 'Trung hạn 2026–2030', 'KHV ' + tr(D.trungHan.tong.th)]);
   h += `<div class="card c12"><div class="ct">Các nhóm dự án</div><div class="cs">Bấm vào ô để xem danh sách</div><div class="tiles">` +
     tiles.map(x => `<div class="tile" onclick="${x[0]}"><div class="ic">${x[1]}</div><div class="v">${x[2]}</div><div class="l">${esc(x[3])}</div><div class="m">${x[4]}</div></div>`).join('') + '</div></div>';
@@ -294,15 +294,15 @@ function veNTM() {
     demTheo(N, k).map(([v, n]) => `<option value="${esc(v)}" ${FN[k === 'kyThuat' ? 'kt' : k === 'keToan' ? 'kto' : 'dv'] === v ? 'selected' : ''}>${esc(v)} (${n})</option>`).join('') + '</select></div>';
   const chips = (k, fk, ten) => `<div style="margin-top:10px"><span class="muted">${ten}:</span><div class="chips">` +
     demTheo(N, k).map(([v, n]) => `<button class="chip ${FN[fk] === v ? 'on' : ''}" onclick="setFN('${fk}','${esc(v).replace(/'/g, "\\'")}')">${esc(v)} · ${n}</button>`).join('') + '</div></div>';
-  let h = `<div class="card"><b>Dự án nông thôn mới (NTM) giai đoạn 2026–2030</b><div class="muted">${esc(nguon)}${can ? ' · ' + esc(can) : ''} · triệu đồng</div>
+  let h = `<div class="card"><b>NTM 2026-2030</b><div class="muted">${esc(nguon)}${can ? ' · ' + esc(can) : ''} · triệu đồng</div>
     <div class="kpis" style="margin-top:8px">
       <div class="kpi"><div class="n">${N.length}</div><div class="l">Dự án</div></div>
       <div class="kpi"><div class="n">${f0(tm)}</div><div class="l">Tổng mức đầu tư (${tr(tm)})</div></div>
       <div class="kpi"><div class="n ${thieu ? 'thieu' : ''}">${thieu}</div><div class="l">Chưa ghi đủ kỹ thuật / kế toán</div></div>
     </div>
   </div>
-  <div class="dash" style="margin-bottom:12px"><div class="card c6"><div class="ct">Dự án NTM theo cán bộ kỹ thuật</div><div class="cs">Số dự án mỗi người phụ trách · bấm tên để lọc danh sách bên dưới</div>${barNTM(N, 'kyThuat', 'kt')}</div>
-    <div class="card c6"><div class="ct">Dự án NTM theo kế toán</div><div class="cs">Số dự án mỗi người phụ trách · bấm tên để lọc danh sách bên dưới</div>${barNTM(N, 'keToan', 'kto')}</div></div>`;
+  <div class="dash" style="margin-bottom:12px"><div class="card c6"><div class="ct">NTM 2026-2030 theo cán bộ kỹ thuật</div><div class="cs">Số dự án mỗi người phụ trách · bấm tên để lọc danh sách bên dưới</div>${barNTM(N, 'kyThuat', 'kt')}</div>
+    <div class="card c6"><div class="ct">NTM 2026-2030 theo kế toán</div><div class="cs">Số dự án mỗi người phụ trách · bấm tên để lọc danh sách bên dưới</div>${barNTM(N, 'keToan', 'kto')}</div></div>`;
   const L = locNTM(N), tmL = L.reduce((a, x) => a + tmNTM(x), 0);
   const coLoc = FN.kt || FN.kto || FN.dv || FN.q;
   h += `<div class="card"><div class="fl">${opt('kyThuat', 'Cán bộ kỹ thuật')}${opt('keToan', 'Kế toán')}${opt('donVi', 'Đơn vị khảo sát')}
