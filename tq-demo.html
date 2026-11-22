@@ -278,12 +278,10 @@ function veTH5() {
     return { gi, ntm, ten: ntm ? 'NTM 2026-2030' : g.ten, n: g.duAn.length, tm: g.duAn.reduce((a, x) => a + tmNTM(x), 0), th: g.duAn.reduce((a, x) => a + (x.th || 0), 0) }; });
   let k = 0; G.forEach(g => g.mau = g.ntm ? '#1a7f4b' : MAU_TH[k++ % MAU_TH.length]);
   const n = G.reduce((a, g) => a + g.n, 0), tm = G.reduce((a, g) => a + g.tm, 0), th = D.trungHan.tong ? D.trungHan.tong.th : G.reduce((a, g) => a + g.th, 0);
-  const bar = (key, nhan, fm) => { const t = G.reduce((a, g) => a + g[key], 0); if (!t) return '';
-    return `<div class="sb"><div class="sbl">${nhan}</div><div class="sbt">` + G.filter(g => g[key] > 0).map(g => { const w = g[key] / t * 100;
-      return `<i style="width:${w}%;background:${g.mau}" onmousemove="tip(event,'<b>${esc(g.ten).replace(/'/g, '&#39;')}</b><br>${nhan}: ${fm(g[key])} (${String(Math.round(w * 10) / 10).replace('.', ',')}%)')" onmouseleave="tip(event)" onclick="moTH(${g.gi},${g.ntm})">${w >= 6 ? fm(g[key]) : ''}</i>`; }).join('') + `</div></div>`; };
+  // Thẻ NTM đứng thứ 3
+  const iN = G.findIndex(g => g.ntm); if (iN >= 0) { const [g] = G.splice(iN, 1); G.splice(Math.min(2, G.length), 0, g); }
   const ntm = G.find(g => g.ntm), ntmNam = D.tienDo ? D.tienDo.nhom.dtc.duAn.filter(laNTM).length : 0;
   return `<div class="hang"><span>Trung hạn 2026–2030: ${n} dự án</span>danh mục 5 năm, không đổi theo năm · KHV trung hạn ${tr(th)}${tm ? ' · TMĐT ' + tr(tm) : ''}</div>
-    ${bar('n', 'Số dự án', v => v)}${bar('tm', 'TMĐT', v => tr(v))}${bar('th', 'KHV trung hạn', v => tr(v))}
     <div class="tiles th5">` + G.map(g => `<div class="tile" style="border-left:5px solid ${g.mau}" onclick="moTH(${g.gi},${g.ntm})">
       <div class="v" style="color:${g.mau};margin-top:0">${g.n}</div><div class="l">${esc(g.ten)}</div>
       <div class="m">${[g.tm ? 'TMĐT ' + tr(g.tm) : '', g.th ? 'KHV TH ' + tr(g.th) : ''].filter(Boolean).join(' · ') || '&nbsp;'}</div>
