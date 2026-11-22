@@ -1,6 +1,6 @@
 {
   "capNhat": "22/11/2026",
-  "ghiChu": "Bấm \"Xem\" để đọc ngay trên trình duyệt, \"Tải về\" để lấy file Word. Các chỗ \"…\" điền theo từng gói thầu.",
+  "ghiChu": "Mẫu lưu trên Google Drive của Ban, chỉ người được chia sẻ mới mở được. Bấm \"Xem\" để đọc, \"Tải về\" để lấy file Word.",
   "nhom": [
     {
       "ten": "Giai đoạn chuẩn bị đầu tư",
@@ -13,14 +13,14 @@
             {
               "loai": "hd",
               "ten": "Hợp đồng",
-              "file": "cbdt/HD-khao-sat-lap-BCKTKT.docx",
-              "kb": 67
+              "kb": 67,
+              "id": "1ffGWhYslnHJVdH3k0qHnL0ms82yoFrX6"
             },
             {
               "loai": "bb",
               "ten": "Biên bản hoàn thiện (thương thảo) hợp đồng",
-              "file": "cbdt/BBHT-khao-sat-lap-BCKTKT.docx",
-              "kb": 2761
+              "kb": 2761,
+              "id": "1QACUBwMaRQoypAu7RJNZx-YQOoLlQ7kc"
             }
           ]
         },
@@ -31,14 +31,14 @@
             {
               "loai": "hd",
               "ten": "Hợp đồng",
-              "file": "cbdt/HD-giam-sat-khao-sat.docx",
-              "kb": 69
+              "kb": 69,
+              "id": "16rzPiMeMMNDALDd4wVVnwygEzfr6FoD8"
             },
             {
               "loai": "bb",
               "ten": "Biên bản hoàn thiện (thương thảo) hợp đồng",
-              "file": "cbdt/BBHT-giam-sat-khao-sat.docx",
-              "kb": 51
+              "kb": 51,
+              "id": "1BqiTjqBHHzL_poFveICz2OjbYqqacXXT"
             }
           ]
         },
@@ -49,14 +49,14 @@
             {
               "loai": "hd",
               "ten": "Hợp đồng",
-              "file": "cbdt/HD-tham-tra-BCKTKT.docx",
-              "kb": 66
+              "kb": 66,
+              "id": "1VCvUzj4rXEFUOFC_eMurtaNIuee5WPW0"
             },
             {
               "loai": "bb",
               "ten": "Biên bản hoàn thiện (thương thảo) hợp đồng",
-              "file": "cbdt/BBHT-tham-tra-BCKTKT.docx",
-              "kb": 37
+              "kb": 37,
+              "id": "1SOJ3YxRay5-Cc1z9aEK-6wyICPaMhrU7"
             }
           ]
         }
