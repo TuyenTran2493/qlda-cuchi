@@ -323,10 +323,10 @@ function veDSNTM() {
     const kt = x.kyThuat ? esc(x.kyThuat) : '<span class="thieu">chưa ghi</span>';
     const kto = x.keToan ? esc(x.keToan) : '<span class="thieu">chưa ghi</span>';
     h += `<tr class="click" onclick="ROW['${esc(id).replace(/'/g, "\\'")}']=!ROW['${esc(id).replace(/'/g, "\\'")}'];veDSNTM()"><td>${i + 1}</td><td>${esc(x.ten)}</td><td class="r">${f0(tmNTM(x))}</td><td class="hide-sm" style="white-space:nowrap">${esc(x.tg || x.tgCT)}</td>` +
-      `<td><div class="who">KT: <b>${kt}</b></div><div class="who">KTo: <b>${kto}</b></div></td></tr>`;
+      `<td style="white-space:nowrap"><div class="who">KS: <b>${x.donVi ? esc(x.donVi) : '<span class="thieu">chưa ghi</span>'}</b></div><div class="who">KT: <b>${kt}</b></div><div class="who">KTo: <b>${kto}</b></div></td></tr>`;
     if (ROW[id]) h += `<tr><td colspan="5"><dl class="detail">${[['Quy mô', x.quyMo], ['Căn cứ', x.ma], ['Chủ trương đầu tư', x.chuTruong], ['QĐ đầu tư', x.qdDT], ['Thời gian KC–HT', x.tg || x.tgCT], ['Đơn vị thực hiện khảo sát', x.donVi], ['Cán bộ kỹ thuật', x.kyThuat], ['Kế toán', x.keToan], ['Ghi chú', x.ghiChu]].filter(a => a[1]).map(a => `<dt>${esc(a[0])}</dt><dd>${esc(a[1])}</dd>`).join('')}</dl></td></tr>`;
   });
-  box.innerHTML = h + '</table></div><div class="muted" style="padding:8px 12px">KT: cán bộ kỹ thuật · KTo: kế toán · bấm dòng để xem chi tiết</div>';
+  box.innerHTML = h + '</table></div><div class="muted" style="padding:8px 12px">KS: đơn vị khảo sát · KT: cán bộ kỹ thuật · KTo: kế toán · bấm dòng để xem chi tiết</div>';
 }
 
 // ---------- TRUNG HẠN ----------
