@@ -373,7 +373,7 @@ let KML = null, MAP = null, LAYERS = [], MAPIDX = null, SEL = null;
 const MAU = { BTXM: '#2a78d6', BTNN: '#eb6834', 'Khác': '#7a7a75' };
 const STOPW = new Set(['sua', 'chua', 'nang', 'cap', 'tuyen', 'duong', 'so', 'hem', 'va', 'cai', 'tao', 'xay', 'dung', 'dau', 'tu', 'he', 'thong', 'thoat', 'nuoc', 'tai', 'lap', 'mat', 'diem', 'cuoi', 'noi', 'dai', 'doan', 'den', 'phia', 'sau']);
 function tuKhoa(s) {
-  s = String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').replace(/^\s*\d+\s*-\s*/, '').replace(/\(.*?\)/g, ' ');
+  s = String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').replace(/^\s*\d+\s*-\s*/, '').replace(/\(([^)]*)\)/g, (m, g) => /diem dau|doan|chieu dai/.test(g) ? ' ' : ' ' + g + ' ');
   s = s.replace(/(^|[\s,;-])(ap|xom)(?=[\s\da-z])[\s\S]*$/, '');
   return s.replace(/[^a-z0-9\/]+/g, ' ').trim().split(' ').filter(w => w && !STOPW.has(w));
 }
@@ -384,7 +384,7 @@ function khopTen(a, K) {
   K.forEach((b, i) => {
     let v;
     if (so(a).sort().join() === so(b).sort().join()) v = sc(a, b);
-    else v = so(a).length === so(b).length && so(a).some(x => so(b).includes(x)) ? sc(chu(a), chu(b)) * 0.8 : 0;
+    else v = so(a).length && so(a).length === so(b).length && so(a)[0] === so(b)[0] ? sc(chu(a), chu(b)) * 0.8 : 0;
     if (v > bs) { bs = v; best = i; }
   });
   return bs >= 0.5 ? best : -1;
@@ -417,7 +417,7 @@ function veBanDo() {
     el.innerHTML = '';
     if (MAP) { MAP.remove(); MAP = null; }
     MAP = L.map(el, { zoomControl: true });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(MAP);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 20, subdomains: 'abcd', attribution: '© OpenStreetMap © CARTO' }).addTo(MAP);
     const N = dsNTM(), K = N.map(x => tuKhoa(x.ten));
     MAPIDX = {};
     LAYERS = KML.map(k => {
