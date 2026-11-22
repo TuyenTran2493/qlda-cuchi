@@ -699,13 +699,43 @@ function dsTH() {
 }
 function capNhatDSTH() { const e = document.getElementById('dsTH'); if (e) e.innerHTML = dsTH(); }
 function moNhomTH(gi) { OPEN['th_' + gi] = true; capNhatDSTH(); const e = document.getElementById('th_' + gi); if (e) e.scrollIntoView({ behavior: 'smooth' }); }
-function xuatTH() {
-  const T = D.trungHan, q = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
-  const rows = [['Nhóm nguồn vốn', 'STT', 'Mã dự án', 'Tên dự án', 'Lĩnh vực', 'Quy mô', 'TMĐT (triệu đồng)', 'KHV trung hạn (triệu đồng)', 'Thời gian KC-HT', 'Đơn vị thực hiện', 'Ghi chú']];
-  let stt = 0;
-  T.nhom.forEach(g => g.duAn.forEach(x => rows.push([g.ten, ++stt, x.ma, x.ten, x.linhVuc, x.quyMo, x.tmdtQD || x.tmdtCT || '', x.th || '', x.tg || x.tgCT, x.donVi, x.ghiChu])));
-  const blob = new Blob(['﻿' + rows.map(r => r.map(q).join(',')).join('\r\n')], { type: 'text/csv;charset=utf-8' });
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'Trung han 2026-2030 xa Cu Chi.csv'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+function napExcelJS() {
+  return window.ExcelJS ? Promise.resolve() : new Promise((ok, loi) => { const sc = document.createElement('script');
+    sc.src = 'https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js'; sc.onload = ok; sc.onerror = () => loi(new Error('Không tải được thư viện Excel')); document.head.appendChild(sc); });
+}
+async function xuatTH() {
+  const nut = document.querySelector('.xbc'), cu = nut ? nut.innerHTML : '';
+  if (nut) { nut.disabled = true; nut.innerHTML = 'Đang tạo file…'; }
+  try {
+    await napExcelJS();
+    const T = D.trungHan, wb = new ExcelJS.Workbook(), ws = wb.addWorksheet('Trung hạn 2026-2030', { views: [{ state: 'frozen', ySplit: 5 }], pageSetup: { orientation: 'landscape', paperSize: 9, fitToPage: true, fitToWidth: 1, fitToHeight: 0 } });
+    const cols = [['STT', 6], ['Mã dự án', 12], ['Tên dự án', 48], ['Lĩnh vực', 16], ['Quy mô', 40], ['TMĐT', 15], ['KHV trung hạn 2026-2030', 17], ['Thời gian KC-HT', 14], ['Đơn vị thực hiện', 22], ['Ghi chú', 30]];
+    ws.columns = cols.map(c => ({ width: c[1] }));
+    const vien = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }, font = { name: 'Times New Roman', size: 12 };
+    ws.mergeCells(1, 1, 1, cols.length); ws.getCell(1, 1).value = 'BAN QUẢN LÝ DỰ ÁN ĐẦU TƯ XÂY DỰNG XÃ CỦ CHI'; ws.getCell(1, 1).font = { ...font, bold: true };
+    ws.mergeCells(2, 1, 2, cols.length); ws.getCell(2, 1).value = 'DANH MỤC DỰ ÁN KẾ HOẠCH ĐẦU TƯ CÔNG TRUNG HẠN 2026-2030'; ws.getCell(2, 1).font = { ...font, size: 14, bold: true }; ws.getCell(2, 1).alignment = { horizontal: 'center' };
+    ws.mergeCells(3, 1, 3, cols.length); ws.getCell(3, 1).value = (T.nhanTH || '') + '  (ĐVT: triệu đồng; số liệu lúc ' + D.capNhat + ')'; ws.getCell(3, 1).font = { ...font, italic: true, size: 11 }; ws.getCell(3, 1).alignment = { horizontal: 'center', wrapText: true };
+    ws.getRow(3).height = 32;
+    const hd = ws.getRow(5); hd.values = cols.map(c => c[0]); hd.height = 34;
+    hd.eachCell(c => { c.font = { ...font, bold: true, color: { argb: 'FFFFFFFF' } }; c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1F5FA8' } }; c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }; c.border = vien; });
+    const G = nhomTH(); let r = 6, stt = 0;
+    const tong = ws.getRow(r); tong.values = ['', '', 'TỔNG CỘNG (' + G.reduce((a, g) => a + g.n, 0) + ' dự án)', '', '', G.reduce((a, g) => a + g.tm, 0), G.reduce((a, g) => a + g.th, 0)];
+    tong.eachCell({ includeEmpty: true }, c => { c.font = { ...font, bold: true, color: { argb: 'FFB42318' } }; c.border = vien; c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFDECEC' } }; }); r++;
+    G.forEach((g, k) => {
+      const row = ws.getRow(r++); row.values = [String.fromCharCode(65 + k), '', g.ten + ' (' + g.n + ' dự án)', '', '', g.tm, g.th];
+      row.eachCell({ includeEmpty: true }, c => { c.font = { ...font, bold: true }; c.border = vien; c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE8F0FB' } }; });
+      T.nhom[g.gi].duAn.forEach(x => {
+        const rr = ws.getRow(r++); rr.values = [++stt, x.ma || '', x.ten || '', x.linhVuc || '', x.quyMo || '', (x.tmdtQD || x.tmdtCT) || null, x.th || null, x.tg || x.tgCT || '', x.donVi || '', x.ghiChu || ''];
+        rr.eachCell({ includeEmpty: true }, c => { c.font = font; c.border = vien; c.alignment = { vertical: 'top', wrapText: true }; });
+        rr.getCell(1).alignment = { horizontal: 'center', vertical: 'top' };
+      });
+    });
+    for (let i = 6; i < r; i++) [6, 7].forEach(j => ws.getCell(i, j).numFmt = '#,##0');
+    const buf = await wb.xlsx.writeBuffer(), a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+    a.download = 'Danh muc trung han 2026-2030 xa Cu Chi.xlsx'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+  } catch (e) { alert(e.message); }
+  if (nut) { nut.disabled = false; nut.innerHTML = cu; }
 }
 
 // ---------- VĂN BẢN PHÁP LUẬT ----------
