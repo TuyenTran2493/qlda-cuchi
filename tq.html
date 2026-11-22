@@ -291,6 +291,14 @@ a{color:var(--navy2)}
 .bma .x{border:1px solid var(--goldl);color:var(--pri);background:#fff}.bma .x:hover{border-color:var(--gold)}
 .bma .t{background:var(--pri);color:#fff;border:1px solid var(--gold)}.bma .t:hover{background:#163a63}
 .bmgc{margin:16px 18px 0;font-size:13px;color:var(--mute)}
+.bmlg{display:flex;gap:16px;align-items:center;margin:18px;padding:18px;border:1px solid var(--goldl);border-radius:12px;background:linear-gradient(135deg,#fff 55%,#faf6ec);max-width:520px}
+.bmlg .vbi{width:56px;height:56px;flex:none}.bmlf{flex:1}.bmlf b{color:var(--pri);display:block;margin-bottom:8px}
+.bmlr{display:flex;gap:8px}.bmlr input{flex:1;padding:9px 12px;border:1px solid var(--goldl);border-radius:8px;font:inherit}.bmlr button{padding:9px 16px}
+.bmle{color:var(--bad);font-size:13px;margin-top:6px}
+.bmov{position:fixed;inset:0;z-index:1000;background:rgba(10,29,54,.75);display:flex;flex-direction:column}
+.bmovh{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 16px;background:#0f2a4a;border-bottom:2px solid var(--gold);color:#fff}
+.bmovh span{display:flex;gap:8px}.bmovb{flex:1;overflow:auto;background:#e9ecf1}.bmovb .docx-wrapper{background:#e9ecf1!important}
+.bmovb .loading,.bmovb .msg{margin:20px}
 @media(max-width:600px){.bmc{grid-template-columns:1fr}.bmf{grid-template-columns:34px 1fr}.bma{grid-column:1/3}}
 </style>
 <script>
@@ -952,46 +960,101 @@ function dsVB(map, order) {
 }
 function capNhatVB() { const e = document.getElementById('dsVB'); if (e) e.innerHTML = dsVB(); }
 function chonVB(k) { VBSEL = VBSEL === k ? '' : k; VBQ = ''; ve(); setTimeout(() => { const e = document.getElementById('dsVB'); if (e && VBSEL) e.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 30); }
-// ---------- BIỂU MẪU (mẫu hợp đồng, biên bản thương thảo) ----------
-// File mẫu nằm trên Google Drive của chị (thư mục "HĐ-BBHT mẫu giai đoạn CBĐT", không công khai);
-// danh sách ở bieu-mau/danh-muc.json (id file Drive). Người lạ bấm sẽ bị Google yêu cầu quyền truy cập.
-let BM = null, BMQ = '', BMLOI = '';
+// ---------- BIỂU MẪU (mẫu hợp đồng, biên bản thương thảo) – có mật khẩu ----------
+// File mẫu nằm trong thư mục Google Drive riêng của Ban (không công khai). Trang này không chứa file hay link file:
+// nhập đúng mật khẩu thì chương trình Apps Script mới trả danh sách và nội dung file. Mỗi máy nhập một lần (lưu trên máy).
+let BM = null, BMQ = '', BMLOI = '', BMDANG = false;
 const ICO_BM = {
   ks: '<path d="M3 20l5-9 4 6 3-4 6 7z"/><circle cx="17" cy="6" r="2.5"/>',
   gs: '<circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/><path d="M8.5 11l2 2 3.5-3.5"/>',
-  tt: '<path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M9 13l2 2 4-4"/>'
+  tt: '<path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M9 13l2 2 4-4"/>',
+  khoa: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/><circle cx="12" cy="16" r="1.3"/>'
 };
-function taiBM() {
-  fetch('bieu-mau/danh-muc.json', { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error('Không đọc được danh mục biểu mẫu (' + r.status + ')'); return r.json(); })
-    .then(j => { BM = j; BMLOI = ''; if (TAB === 'bm') ve(); })
-    .catch(e => { BMLOI = e.message; if (TAB === 'bm') ve(); });
+function mkBM() { try { return localStorage.getItem('bm_mk') || ''; } catch (e) { return ''; } }
+function luuMkBM(v) { try { v ? localStorage.setItem('bm_mk', v) : localStorage.removeItem('bm_mk'); } catch (e) {} }
+function tenGoiBM(t) {
+  return t.replace(/\bGSKS\b/g, 'giám sát khảo sát xây dựng').replace(/\bBCKTKT\b/g, 'Báo cáo kinh tế - kỹ thuật')
+    .replace(/\bTKBVTC\b/g, 'thiết kế bản vẽ thi công').replace(/\bTVGS\b/g, 'tư vấn giám sát');
 }
-function urlBM(f) { return new URL('bieu-mau/' + f, location.href).href; }
+// Gom file theo gói: "MẪU - HĐ <gói>" và "MẪU - BBHT HĐ <gói>"
+function gomBM(nhom) {
+  return nhom.map(n => {
+    const map = {}, order = [];
+    n.files.forEach(f => {
+      let t = f.ten.replace(/\.(docx?|pdf|xlsx?)$/i, '').replace(/^\s*\(?MẪU\)?\s*[-–:]?\s*/i, '').trim(), loai = 'khac';
+      if (/^(BBHT|BB|biên bản)/i.test(t)) { loai = 'bb'; t = t.replace(/^(BBHT|BB|biên bản( hoàn thiện| thương thảo)?)\s*(HĐ|hợp đồng)?\s*/i, ''); }
+      else if (/^(HĐ|hợp đồng)/i.test(t)) { loai = 'hd'; t = t.replace(/^(HĐ|hợp đồng)\s*/i, ''); }
+      const goi = tenGoiBM(t || f.ten), k = boDau(goi);
+      if (!map[k]) { map[k] = { ten: /^tư vấn/i.test(goi) ? goi : 'Tư vấn ' + goi.charAt(0).toLowerCase() + goi.slice(1), files: [] }; order.push(k); }
+      map[k].files.push(Object.assign({ loai: loai, nhan: loai === 'hd' ? 'Hợp đồng' : loai === 'bb' ? 'Biên bản hoàn thiện (thương thảo) hợp đồng' : f.ten }, f));
+    });
+    order.forEach(k => map[k].files.sort((a, b) => (a.loai === 'hd' ? 0 : 1) - (b.loai === 'hd' ? 0 : 1)));
+    return { ten: n.ten, moTa: n.moTa, goi: order.map(k => map[k]) };
+  });
+}
+function taiBM(mk) {
+  BMDANG = true; BMLOI = ''; if (TAB === 'bm') ve();
+  google.script.run.withSuccessHandler(d => { BMDANG = false; luuMkBM(mk); BM = gomBM(d); if (TAB === 'bm') ve(); })
+    .withFailureHandler(e => { BMDANG = false; BM = null; if (/mật khẩu/i.test(e.message)) luuMkBM(''); BMLOI = e.message; if (TAB === 'bm') ve(); })
+    .bmDanhSach(mk);
+}
+function dangNhapBM(ev) { ev.preventDefault(); const v = document.getElementById('bmmk').value.trim(); if (v) taiBM(v); }
+function thoatBM() { luuMkBM(''); BM = null; BMLOI = ''; ve(); }
+function icoGoiBM(t) { const b = boDau(t); return ICO_BM[/giam sat/.test(b) ? 'gs' : /tham tra|tham dinh/.test(b) ? 'tt' : 'ks']; }
 function veBM() {
-  if (BMLOI) return '<div class="msg err">' + esc(BMLOI) + '</div>';
-  if (!BM) { taiBM(); return '<div class="loading">Đang tải biểu mẫu…</div>'; }
-  let tong = 0; BM.nhom.forEach(n => n.goi.forEach(g => tong += g.files.length));
+  if (!BM) {
+    const mk = mkBM();
+    if (mk && !BMDANG && !BMLOI) { taiBM(mk); }
+    return `<div class="thd vbd"><div class="thd-h"><div><h2>Mẫu hợp đồng và biên bản thương thảo</h2>
+      <div class="sub2">Phần này chỉ dành cho cán bộ Ban QLDA. Nhập mật khẩu để xem và tải mẫu; mỗi máy chỉ cần nhập một lần.</div></div></div>
+      <form class="bmlg" onsubmit="dangNhapBM(event)"><div class="vbi">${SVGI(ICO_BM.khoa)}</div>
+      <div class="bmlf"><b>Nhập mật khẩu</b><div class="bmlr"><input id="bmmk" type="password" autocomplete="current-password" placeholder="Mật khẩu" ${BMDANG ? 'disabled' : ''}>
+      <button ${BMDANG ? 'disabled' : ''}>${BMDANG ? 'Đang kiểm tra…' : 'Vào xem'}</button></div>
+      ${BMLOI ? `<div class="bmle">${esc(BMLOI)}</div>` : ''}</div></form></div>`;
+  }
+  let tong = 0; BM.forEach(n => n.goi.forEach(g => tong += g.files.length));
   return `<div class="thd vbd"><div class="thd-h"><div><h2>Mẫu hợp đồng và biên bản thương thảo <span class="vbc">${tong} mẫu</span></h2>
-      <div class="sub2">${esc(BM.ghiChu || '')} Cập nhật ${esc(BM.capNhat || '')}.</div></div>
-      <div class="thd-a"><label class="srch">${ICO.tim}<input placeholder="Tìm gói thầu, loại mẫu…" value="${esc(BMQ)}" oninput="BMQ=this.value;capNhatBM()"></label></div></div>
+      <div class="sub2">Bấm "Xem" để đọc ngay trên trang, "Tải về" để lấy file Word. Các chỗ "…" điền theo từng gói thầu.</div></div>
+      <div class="thd-a"><label class="srch">${ICO.tim}<input placeholder="Tìm gói thầu, loại mẫu…" value="${esc(BMQ)}" oninput="BMQ=this.value;capNhatBM()"></label><button class="ghost" onclick="thoatBM()">Khóa lại</button></div></div>
     <div class="bmg" id="dsBM">${dsBM()}</div></div>`;
 }
 function dsBM() {
   const q = boDau(BMQ.trim());
   let out = '';
-  BM.nhom.forEach(n => {
-    const goi = n.goi.map(g => ({ g, files: g.files.filter(f => !q || boDau(n.ten + ' ' + g.ten + ' ' + f.ten).includes(q)) })).filter(x => x.files.length);
+  BM.forEach(n => {
+    const goi = n.goi.map(g => ({ g, files: g.files.filter(f => !q || boDau(n.ten + ' ' + g.ten + ' ' + f.nhan + ' ' + f.ten).includes(q)) })).filter(x => x.files.length);
     if (!goi.length) return;
     out += `<div class="bmn">${esc(n.ten)} <span>${esc(n.moTa || '')}</span></div><div class="bmc">` + goi.map(({ g, files }) => `<div class="bmk">
-      <div class="bmh"><div class="vbi">${SVGI(ICO_BM[g.ma] || ICO_VB['hợp đồng'])}</div><b>${esc(g.ten)}</b></div>` +
-      files.map(f => { const xem = f.id ? 'https://drive.google.com/file/d/' + f.id + '/view' : 'https://view.officeapps.live.com/op/view.aspx?src=' + encodeURIComponent(urlBM(f.file)), tai = f.id ? 'https://drive.google.com/uc?export=download&id=' + f.id : urlBM(f.file);
-        return `<div class="bmf"><div class="bmt ${f.loai === 'bb' ? 'bb' : 'hd'}">${f.loai === 'bb' ? 'BB' : 'HĐ'}</div>
-        <div><b>${esc(f.ten)}</b><span>Word · ${f.kb ? f.kb.toLocaleString('vi-VN') + ' KB' : 'docx'}</span></div>
-        <div class="bma"><a class="x" target="_blank" rel="noopener" href="${esc(xem)}">Xem</a><a class="t" target="_blank" rel="noopener" href="${esc(tai)}">Tải về</a></div></div>`; }).join('') + '</div>').join('') + '</div>';
+      <div class="bmh"><div class="vbi">${SVGI(icoGoiBM(g.ten))}</div><b>${esc(g.ten)}</b></div>` +
+      files.map(f => `<div class="bmf"><div class="bmt ${f.loai === 'bb' ? 'bb' : 'hd'}">${f.loai === 'bb' ? 'BB' : f.loai === 'hd' ? 'HĐ' : 'File'}</div>
+        <div><b>${esc(f.nhan)}</b><span>Word · ${f.kb ? f.kb.toLocaleString('vi-VN') + ' KB' : ''}${f.sua ? ' · sửa ' + esc(f.sua) : ''}</span></div>
+        <div class="bma"><a class="x" href="#" onclick="moBM('${f.id}',false,this);return false">Xem</a><a class="t" href="#" onclick="moBM('${f.id}',true,this);return false">Tải về</a></div></div>`).join('') + '</div>').join('') + '</div>';
   });
   return out || `<div class="bmgc">Không có mẫu nào khớp "${esc(BMQ)}".</div>`;
 }
 function capNhatBM() { const e = document.getElementById('dsBM'); if (e) e.innerHTML = dsBM(); }
+function napDocxPreview() {
+  if (window.docx && window.docx.renderAsync) return Promise.resolve();
+  const n = s => new Promise((ok, no) => { const e = document.createElement('script'); e.src = s; e.onload = ok; e.onerror = () => no(new Error('Không tải được bộ xem Word')); document.head.appendChild(e); });
+  return n('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js').then(() => n('https://cdn.jsdelivr.net/npm/docx-preview@0.3.2/dist/docx-preview.min.js'));
+}
+function moBM(id, tai, nut) {
+  const cu = nut.textContent; nut.textContent = 'Đang mở…'; nut.style.pointerEvents = 'none';
+  const xong = () => { nut.textContent = cu; nut.style.pointerEvents = ''; };
+  google.script.run.withSuccessHandler(d => {
+    const by = Uint8Array.from(atob(d.b64), c => c.charCodeAt(0)), blob = new Blob([by], { type: d.mime });
+    if (tai) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = d.ten; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 3000); xong(); return; }
+    const ov = document.createElement('div'); ov.className = 'bmov';
+    ov.innerHTML = `<div class="bmovh"><b>${esc(d.ten)}</b><span><button class="ghost" id="bmovt">Tải về</button><button class="ghost" id="bmovx">Đóng ✕</button></span></div><div class="bmovb"><div class="loading">Đang hiển thị…</div></div>`;
+    document.body.appendChild(ov); document.body.style.overflow = 'hidden';
+    ov.querySelector('#bmovx').onclick = () => { ov.remove(); document.body.style.overflow = ''; };
+    ov.querySelector('#bmovt').onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = d.ten; a.click(); };
+    const bd = ov.querySelector('.bmovb');
+    napDocxPreview().then(() => { bd.innerHTML = ''; return docx.renderAsync(blob, bd, null, { inWrapper: true, ignoreLastRenderedPageBreak: true }); })
+      .catch(e => { bd.innerHTML = '<div class="msg err">' + esc(e.message) + ' – bấm "Tải về" để mở bằng Word.</div>'; }).then(xong);
+  }).withFailureHandler(e => { xong(); if (/mật khẩu/i.test(e.message)) { luuMkBM(''); BM = null; BMLOI = 'Mật khẩu đã đổi, vui lòng nhập lại.'; ve(); } else alert(e.message); })
+    .bmFile(mkBM(), id);
+}
 tai(false);
 </script>
 </body></html>
