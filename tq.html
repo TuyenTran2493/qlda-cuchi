@@ -203,13 +203,6 @@ function veTQ() {
   if (D.trungHan && D.trungHan.tong) tiles.push([`chuyen('th')`, '📋', D.trungHan.nhom.reduce((a, g) => a + g.duAn.length, 0), 'Trung hạn 2026–2030', 'KHV ' + tr(D.trungHan.tong.th)]);
   h += `<div class="card c12"><div class="ct">Các nhóm dự án</div><div class="cs">Bấm vào ô để xem danh sách</div><div class="tiles">` +
     tiles.map(x => `<div class="tile" onclick="${x[0]}"><div class="ic">${x[1]}</div><div class="v">${x[2]}</div><div class="l">${esc(x[3])}</div><div class="m">${x[4]}</div></div>`).join('') + '</div></div>';
-  // 4. Phân công NTM
-  if (N.length) {
-    const bar = (k) => { const L = demTheo(N, k), mx = Math.max(...L.map(a => a[1]));
-      return `<div class="hb hb2">` + L.map(([v, n]) => `<div class="r" style="cursor:pointer" onclick="FN={kt:'',kto:'',dv:'',q:''};FN['${k === 'kyThuat' ? 'kt' : 'kto'}']='${esc(v).replace(/'/g, "\\'")}';chuyen('ntm')"><div class="nm"${v === '(chưa ghi)' ? ' style="color:var(--warn)"' : ''}>${esc(v)}</div><div class="tr"><i class="${v === '(chưa ghi)' ? 'w' : ''}" style="width:${n / mx * 100}%"></i></div><div class="pv">${n}</div></div>`).join('') + '</div>'; };
-    h += `<div class="card c6"><div class="ct">Dự án NTM theo cán bộ kỹ thuật</div><div class="cs">Số dự án mỗi người phụ trách · bấm tên để xem danh sách</div>${bar('kyThuat')}</div>
-      <div class="card c6"><div class="ct">Dự án NTM theo kế toán</div><div class="cs">Số dự án mỗi người phụ trách · bấm tên để xem danh sách</div>${bar('keToan')}</div>`;
-  }
   // 5. Đấu thầu
   if (D.dauThau) {
     const x = D.dauThau, tk = x.tongGia ? x.tietKiem / x.tongGia * 100 : 0;
@@ -285,6 +278,11 @@ function locNTM(ds) {
     (!q || (x.ten + ' ' + (x.quyMo || '')).toLowerCase().includes(q)));
 }
 function setFN(k, v) { FN[k] = FN[k] === v ? '' : v; ve(); }
+function barNTM(N, k, fk) {
+  const L = demTheo(N, k), mx = Math.max(...L.map(a => a[1]));
+  return `<div class="hb hb2">` + L.map(([v, n]) => { const on = FN[fk] === v, cx = v === '(chưa ghi)';
+    return `<div class="r" style="cursor:pointer${on ? ';background:#e8f0fb' : ''}" onclick="setFN('${fk}','${esc(v).replace(/'/g, "\\'")}')"><div class="nm"${cx ? ' style="color:var(--warn)"' : on ? ' style="font-weight:700"' : ''}>${esc(v)}</div><div class="tr"><i class="${cx ? 'w' : ''}" style="width:${n / mx * 100}%"></i></div><div class="pv">${n}</div></div>`; }).join('') + '</div>';
+}
 function veNTM() {
   const N = dsNTM();
   if (!N.length) return '<div class="card">Chưa có dự án NTM trong tab Trung hạn 26-30.</div>';
@@ -302,9 +300,9 @@ function veNTM() {
       <div class="kpi"><div class="n">${f0(tm)}</div><div class="l">Tổng mức đầu tư (${tr(tm)})</div></div>
       <div class="kpi"><div class="n ${thieu ? 'thieu' : ''}">${thieu}</div><div class="l">Chưa ghi đủ kỹ thuật / kế toán</div></div>
     </div>
-    ${chips('kyThuat', 'kt', 'Cán bộ kỹ thuật (bấm tên để lọc)')}
-    ${chips('keToan', 'kto', 'Kế toán (bấm tên để lọc)')}
-  </div>`;
+  </div>
+  <div class="dash" style="margin-bottom:12px"><div class="card c6"><div class="ct">Dự án NTM theo cán bộ kỹ thuật</div><div class="cs">Số dự án mỗi người phụ trách · bấm tên để lọc danh sách bên dưới</div>${barNTM(N, 'kyThuat', 'kt')}</div>
+    <div class="card c6"><div class="ct">Dự án NTM theo kế toán</div><div class="cs">Số dự án mỗi người phụ trách · bấm tên để lọc danh sách bên dưới</div>${barNTM(N, 'keToan', 'kto')}</div></div>`;
   const L = locNTM(N), tmL = L.reduce((a, x) => a + tmNTM(x), 0);
   const coLoc = FN.kt || FN.kto || FN.dv || FN.q;
   h += `<div class="card"><div class="fl">${opt('kyThuat', 'Cán bộ kỹ thuật')}${opt('keToan', 'Kế toán')}${opt('donVi', 'Đơn vị khảo sát')}
