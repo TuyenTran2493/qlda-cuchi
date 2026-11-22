@@ -69,6 +69,9 @@ a{color:var(--pri)}
 .tile .v{font-size:24px;font-weight:700;margin-top:8px}
 .tile .l{font-size:13px;font-weight:600}
 .tile .m{font-size:12px;color:var(--mute);margin-top:2px}
+.tile .ntm{margin-top:4px;font-size:12px;color:#1a7f4b;font-weight:600}
+.hang{margin-top:16px;font-size:12px;color:var(--mute);border-top:1px dashed var(--line);padding-top:10px}.hang span{font-weight:700;color:var(--ink);font-size:13px;margin-right:8px}
+.chips{display:flex;gap:6px;margin:8px 0}.chip{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:16px;padding:4px 10px;font-size:12px}.chip.on{background:var(--pri);color:#fff;border-color:var(--pri)}
 .hb{margin-top:10px}
 .hb .r{display:grid;grid-template-columns:minmax(0,1fr) 150px 46px;gap:8px;align-items:center;padding:5px 4px;border-radius:6px;cursor:default}
 .hb .r:hover{background:#f5f8ff}
@@ -228,20 +231,30 @@ function veTQ() {
   h += `<div class="card c5"><div class="ct">Vốn đầu tư công năm ${D.nam}</div><div class="cs">${esc(nhanGN)} · triệu đồng</div>
     <div class="gauge">${vong(p)}<div class="gstats"><div class="a"><b>${f0(t.khv)}</b><span>KHV đã giao</span></div><div class="b"><b>${f0(t.gn)}</b><span>Đã giải ngân</span></div><div><b>${f0(t.khv - t.gn)}</b><span>Còn phải giải ngân</span></div></div></div></div>`;
   // 2. Giải ngân từng dự án
-  const ds = D.tienDo.nhom.dtc.duAn.filter(x => x.khv > 0).map(x => ({ ten: x.ten, khv: x.khv, gn: x.gn, p: pctN(x.gn, x.khv) })).sort((a, b) => a.p - b.p);
+  const coNTM = D.tienDo.nhom.dtc.duAn.some(x => x.khv > 0 && laNTM(x));
+  if (!coNTM) LOCGN = '';
+  const ds = D.tienDo.nhom.dtc.duAn.filter(x => x.khv > 0 && (!LOCGN || (LOCGN === 'ntm') === laNTM(x))).map(x => ({ ten: x.ten, khv: x.khv, gn: x.gn, p: pctN(x.gn, x.khv) })).sort((a, b) => a.p - b.p);
+  const chip = (v, t) => `<button class="chip ${LOCGN === v ? 'on' : ''}" onclick="LOCGN='${v}';ve()">${t}</button>`;
   h += `<div class="card c7"><div class="ct">Giải ngân từng dự án đầu tư công</div><div class="cs">Xếp từ thấp đến cao · rê chuột (hoặc chạm) vào dòng để xem số tiền</div>
+    ${coNTM ? `<div class="chips">${chip('', 'Tất cả')}${chip('ntm', 'NTM')}${chip('khac', 'Ngoài NTM')}</div>` : ''}
     <div class="hb" style="max-height:236px;overflow:auto">` + ds.map(x => `<div class="r" onmousemove="tip(event,'<b>${esc(x.ten).replace(/'/g, '&#39;')}</b><br>Giải ngân ${f0(x.gn)} / ${f0(x.khv)} triệu')" onmouseleave="tip(event)" onclick="tip(event,'<b>${esc(x.ten).replace(/'/g, '&#39;')}</b><br>Giải ngân ${f0(x.gn)} / ${f0(x.khv)} triệu')">
       <div class="nm">${esc(x.ten)}</div><div class="tr"><i class="${x.p < 50 ? 'w' : ''}" style="width:${Math.min(100, x.p)}%"></i></div><div class="pv">${String(x.p).replace('.', ',')}%</div></div>`).join('') +
     `</div><div class="lg"><span><i style="background:#2a78d6"></i>Từ 50% trở lên</span><span><i style="background:#eda100"></i>Dưới 50% – cần đôn đốc (${ds.filter(x => x.p < 50).length} dự án)</span></div></div>`;
-  // 3. Nhóm dự án
-  const tiles = [];
+  // 3. Nhóm dự án: hàng 1 theo năm đang chọn, hàng 2 cả giai đoạn trung hạn
   const IC = { dtc: '🏗', ctx: '🛠', pctt: '🌊' };
-  NHOM.forEach(k => { const s = sumNhom(k); tiles.push([`moNhom('${k}')`, IC[k], s.n, D.tienDo.nhom[k].ten, s.tmdt ? 'TMĐT ' + tr(s.tmdt) : '']); });
-  const N = dsNTM();
-  if (N.length) tiles.push([`chuyen('ntm')`, '🌾', N.length, 'NTM 2026-2030', 'TMĐT ' + tr(N.reduce((a, x) => a + tmNTM(x), 0))]);
-  if (D.trungHan && D.trungHan.tong) tiles.push([`chuyen('th')`, '📋', D.trungHan.nhom.reduce((a, g) => a + g.duAn.length, 0), 'Trung hạn 2026–2030', 'KHV ' + tr(D.trungHan.tong.th)]);
-  h += `<div class="card c12"><div class="ct">Các nhóm dự án</div><div class="cs">Bấm vào ô để xem danh sách</div><div class="tiles">` +
-    tiles.map(x => `<div class="tile" onclick="${x[0]}"><div class="ic">${x[1]}</div><div class="v">${x[2]}</div><div class="l">${esc(x[3])}</div><div class="m">${x[4]}</div></div>`).join('') + '</div></div>';
+  const N = dsNTM(), dtcDS = D.tienDo.nhom.dtc.duAn, ntmNam = dtcDS.filter(laNTM);
+  const nam = [], gd = [];
+  NHOM.forEach(k => { const s = sumNhom(k);
+    let m = [s.tmdt ? 'TMĐT ' + tr(s.tmdt) : '', s.khv ? 'Vốn năm ' + tr(s.khv) : ''].filter(Boolean).join(' · ');
+    if (k === 'dtc' && ntmNam.length) m += `<div class="ntm">trong đó NTM: ${ntmNam.length} dự án</div>`;
+    nam.push([`moNhom('${k}')`, IC[k], s.n, D.tienDo.nhom[k].ten, m]); });
+  if (N.length) gd.push([`chuyen('ntm')`, '🌾', N.length, 'NTM 2026-2030', 'TMĐT ' + tr(N.reduce((a, x) => a + tmNTM(x), 0)) +
+    `<div class="ntm">${ntmNam.length ? ntmNam.length + ' dự án có vốn năm ' + D.nam : 'Chưa có dự án được giao vốn năm ' + D.nam}</div>`]);
+  if (D.trungHan && D.trungHan.tong) gd.push([`chuyen('th')`, '📋', D.trungHan.nhom.reduce((a, g) => a + g.duAn.length, 0), 'Trung hạn 2026–2030', 'KHV ' + tr(D.trungHan.tong.th)]);
+  const o = x => `<div class="tile" onclick="${x[0]}"><div class="ic">${x[1]}</div><div class="v">${x[2]}</div><div class="l">${esc(x[3])}</div><div class="m">${x[4]}</div></div>`;
+  h += `<div class="card c12"><div class="ct">Các nhóm dự án</div><div class="cs">Bấm vào ô để xem danh sách</div>
+    <div class="hang"><span>Năm ${D.nam}</span>thay đổi theo năm chọn ở góc trên</div><div class="tiles">${nam.map(o).join('')}</div>
+    ${gd.length ? `<div class="hang"><span>Cả giai đoạn 2026–2030</span>danh mục 5 năm, không đổi theo năm</div><div class="tiles">${gd.map(o).join('')}</div>` : ''}</div>`;
   // 5. Đấu thầu
   if (D.dauThau) {
     const x = D.dauThau, tk = x.tongGia ? x.tietKiem / x.tongGia * 100 : 0;
@@ -252,6 +265,13 @@ function veTQ() {
       ${x.chuaGan ? `<div class="muted" style="margin-top:8px;color:var(--warn)">${x.chuaGan} gói thầu chưa gắn được vào dự án.</div>` : ''}</div>`;
   }
   return h + '</div>';
+}
+// Dự án đầu tư công trong năm có thuộc NTM không: theo nguồn vốn, nếu không ghi thì so tên với danh mục NTM 2026-2030
+let LOCGN = '', _ntmK = null;
+function laNTM(x) {
+  if (/XNTM|NTM|nông thôn mới/i.test(x.nguonVon || '')) return true;
+  if (!_ntmK || _ntmK.d !== D) _ntmK = { d: D, k: dsNTM().map(y => tuKhoa(y.ten)) };
+  return _ntmK.k.length ? khopTen(tuKhoa(x.ten), _ntmK.k) >= 0 : false;
 }
 function chuyen(t) { document.querySelector(`#tabs button[data-t="${t}"]`).click(); }
 function moNhom(k) { OPEN['g_' + k] = true; chuyen('da'); setTimeout(() => { const e = document.getElementById('g_' + k); if (e) e.scrollIntoView(); }, 50); }
