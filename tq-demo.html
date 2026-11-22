@@ -69,6 +69,10 @@ a{color:var(--pri)}
 .tile .v{font-size:24px;font-weight:700;margin-top:8px}
 .tile .l{font-size:13px;font-weight:600}
 .tile .m{font-size:12px;color:var(--mute);margin-top:2px}
+.sb{display:grid;grid-template-columns:110px 1fr;gap:10px;align-items:center;margin-top:10px}.sbl{font-size:12px;color:var(--mute)}
+.sbt{display:flex;height:26px;border-radius:7px;overflow:hidden;background:#eef1f5}.sbt i{display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-style:normal;font-weight:600;cursor:pointer;white-space:nowrap;overflow:hidden;border-right:2px solid #fff}.sbt i:last-child{border-right:0}
+.th5{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+@media(max-width:600px){.sb{grid-template-columns:1fr;gap:3px}}
 .tile .ntm{margin-top:4px;font-size:12px;color:#1a7f4b;font-weight:600}
 .hang{margin-top:16px;font-size:12px;color:var(--mute);border-top:1px dashed var(--line);padding-top:10px}.hang span{font-weight:700;color:var(--ink);font-size:13px;margin-right:8px}
 .chips{display:flex;gap:6px;margin:8px 0}.chip{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:16px;padding:4px 10px;font-size:12px}.chip.on{background:var(--pri);color:#fff;border-color:var(--pri)}
@@ -243,18 +247,15 @@ function veTQ() {
   // 3. Nhóm dự án: hàng 1 theo năm đang chọn, hàng 2 cả giai đoạn trung hạn
   const IC = { dtc: '🏗', ctx: '🛠', pctt: '🌊' };
   const N = dsNTM(), dtcDS = D.tienDo.nhom.dtc.duAn, ntmNam = dtcDS.filter(laNTM);
-  const nam = [], gd = [];
+  const nam = [];
   NHOM.forEach(k => { const s = sumNhom(k);
     let m = [s.tmdt ? 'TMĐT ' + tr(s.tmdt) : '', s.khv ? 'Vốn năm ' + tr(s.khv) : ''].filter(Boolean).join(' · ');
     if (k === 'dtc' && ntmNam.length) m += `<div class="ntm">trong đó NTM: ${ntmNam.length} dự án</div>`;
     nam.push([`moNhom('${k}')`, IC[k], s.n, D.tienDo.nhom[k].ten, m]); });
-  if (N.length) gd.push([`chuyen('ntm')`, '🌾', N.length, 'NTM 2026-2030', 'TMĐT ' + tr(N.reduce((a, x) => a + tmNTM(x), 0)) +
-    `<div class="ntm">${ntmNam.length ? ntmNam.length + ' dự án có vốn năm ' + D.nam : 'Chưa có dự án được giao vốn năm ' + D.nam}</div>`]);
-  if (D.trungHan && D.trungHan.tong) gd.push([`chuyen('th')`, '📋', D.trungHan.nhom.reduce((a, g) => a + g.duAn.length, 0), 'Trung hạn 2026–2030', 'KHV ' + tr(D.trungHan.tong.th)]);
   const o = x => `<div class="tile" onclick="${x[0]}"><div class="ic">${x[1]}</div><div class="v">${x[2]}</div><div class="l">${esc(x[3])}</div><div class="m">${x[4]}</div></div>`;
   h += `<div class="card c12"><div class="ct">Các nhóm dự án</div><div class="cs">Bấm vào ô để xem danh sách</div>
     <div class="hang"><span>Năm ${D.nam}</span>thay đổi theo năm chọn ở góc trên</div><div class="tiles">${nam.map(o).join('')}</div>
-    ${gd.length ? `<div class="hang"><span>Cả giai đoạn 2026–2030</span>danh mục 5 năm, không đổi theo năm</div><div class="tiles">${gd.map(o).join('')}</div>` : ''}</div>`;
+    ${veTH5()}</div>`;
   // 5. Đấu thầu
   if (D.dauThau) {
     const x = D.dauThau, tk = x.tongGia ? x.tietKiem / x.tongGia * 100 : 0;
@@ -269,6 +270,26 @@ function veTQ() {
 // Dự án đầu tư công trong năm thuộc NTM: nhận theo cột Nguồn vốn của tab Tiến độ (có chữ NTM / XNTM / nông thôn mới)
 let LOCGN = '';
 function laNTM(x) { return /XNTM|NTM|nông thôn mới/i.test(x.nguonVon || ''); }
+// Trung hạn 2026-2030 chia theo nhóm nguồn vốn (tổng các nhóm = tổng dự án trung hạn)
+const MAU_TH = ['#2a78d6', '#d6542a', '#7c5cd6', '#eda100', '#13a3b5', '#c2408a', '#5b6b7f'];
+function veTH5() {
+  if (!D.trungHan || !D.trungHan.nhom.length) return '';
+  const G = D.trungHan.nhom.map((g, gi) => { const ntm = /XNTM|NTM|nông thôn mới/i.test(g.ten);
+    return { gi, ntm, ten: ntm ? 'NTM 2026-2030' : g.ten, n: g.duAn.length, tm: g.duAn.reduce((a, x) => a + tmNTM(x), 0), th: g.duAn.reduce((a, x) => a + (x.th || 0), 0) }; });
+  let k = 0; G.forEach(g => g.mau = g.ntm ? '#1a7f4b' : MAU_TH[k++ % MAU_TH.length]);
+  const n = G.reduce((a, g) => a + g.n, 0), tm = G.reduce((a, g) => a + g.tm, 0), th = D.trungHan.tong ? D.trungHan.tong.th : G.reduce((a, g) => a + g.th, 0);
+  const bar = (key, nhan, fm) => { const t = G.reduce((a, g) => a + g[key], 0); if (!t) return '';
+    return `<div class="sb"><div class="sbl">${nhan}</div><div class="sbt">` + G.filter(g => g[key] > 0).map(g => { const w = g[key] / t * 100;
+      return `<i style="width:${w}%;background:${g.mau}" onmousemove="tip(event,'<b>${esc(g.ten).replace(/'/g, '&#39;')}</b><br>${nhan}: ${fm(g[key])} (${String(Math.round(w * 10) / 10).replace('.', ',')}%)')" onmouseleave="tip(event)" onclick="moTH(${g.gi},${g.ntm})">${w >= 6 ? fm(g[key]) : ''}</i>`; }).join('') + `</div></div>`; };
+  const ntm = G.find(g => g.ntm), ntmNam = D.tienDo ? D.tienDo.nhom.dtc.duAn.filter(laNTM).length : 0;
+  return `<div class="hang"><span>Trung hạn 2026–2030: ${n} dự án</span>danh mục 5 năm, không đổi theo năm · KHV trung hạn ${tr(th)}${tm ? ' · TMĐT ' + tr(tm) : ''}</div>
+    ${bar('n', 'Số dự án', v => v)}${bar('tm', 'TMĐT', v => tr(v))}${bar('th', 'KHV trung hạn', v => tr(v))}
+    <div class="tiles th5">` + G.map(g => `<div class="tile" style="border-left:5px solid ${g.mau}" onclick="moTH(${g.gi},${g.ntm})">
+      <div class="v" style="color:${g.mau};margin-top:0">${g.n}</div><div class="l">${esc(g.ten)}</div>
+      <div class="m">${[g.tm ? 'TMĐT ' + tr(g.tm) : '', g.th ? 'KHV TH ' + tr(g.th) : ''].filter(Boolean).join(' · ') || '&nbsp;'}</div>
+      ${g.ntm ? `<div class="ntm">${ntmNam ? ntmNam + ' dự án có vốn năm ' + D.nam : 'Chưa giao vốn năm ' + D.nam}</div>` : ''}</div>`).join('') + '</div>';
+}
+function moTH(gi, ntm) { if (ntm) return chuyen('ntm'); OPEN['th_' + gi] = true; chuyen('th'); setTimeout(() => { const e = document.getElementById('th_' + gi); if (e) e.scrollIntoView(); }, 50); }
 function chuyen(t) { document.querySelector(`#tabs button[data-t="${t}"]`).click(); }
 function moNhom(k) { OPEN['g_' + k] = true; chuyen('da'); setTimeout(() => { const e = document.getElementById('g_' + k); if (e) e.scrollIntoView(); }, 50); }
 
