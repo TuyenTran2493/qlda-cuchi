@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Ban quản lý dự án đầu tư xây dựng xã Củ Chi</title><style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#1d2433;--mute:#667085;--line:#e4e7ec;--pri:#1f5fa8;--pri2:#e8f0fb;--ok:#1a7f4b;--warn:#b45309;--bad:#b42318}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.45}
+header{background:var(--pri);color:#fff;padding:14px max(12px,calc((100% - 1100px)/2 + 12px))}
+header h1{margin:0;font-size:17px;font-weight:600}
+header .sub{opacity:.85;font-size:13px;margin-top:2px}
+main{max-width:1100px;margin:0 auto;padding:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px}
+.muted{color:var(--mute);font-size:13px}
+label{display:block;font-weight:600;font-size:14px;margin:12px 0 4px}
+label .req{color:var(--bad)}
+input,select,textarea{width:100%;padding:10px;border:1px solid #cfd4dc;border-radius:8px;font:inherit;background:#fff}
+textarea{min-height:70px}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--pri);background:var(--pri);color:#fff;padding:10px 16px}
+button.ghost{background:#fff;color:var(--pri)}
+button:disabled{opacity:.5;cursor:default}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:8px max(12px,calc((100% - 1100px)/2 + 12px));background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.tabs button{background:#fff;color:var(--ink);border:1px solid var(--line);white-space:nowrap;padding:8px 12px}
+.tabs button.on{background:var(--pri);color:#fff;border-color:var(--pri)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.kpi{background:var(--pri2);border-radius:8px;padding:10px}
+.kpi .n{font-size:20px;font-weight:700}
+.kpi .l{font-size:12px;color:var(--mute)}
+.grp{border:1px solid var(--line);border-radius:10px;margin-bottom:10px;background:#fff;overflow:hidden}
+.grp>.hd{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 14px;cursor:pointer;background:#fafbfc}
+.grp>.hd b{font-size:15px}
+.grp>.hd .s{font-size:13px;color:var(--mute);text-align:right}
+.grp>.bd{display:none;padding:0 0 6px}
+.grp.open>.bd{display:block}
+.chev{transition:transform .15s;display:inline-block;margin-right:6px}
+.grp.open .chev{transform:rotate(90deg)}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th,.tbl td{border-top:1px solid var(--line);padding:8px;text-align:left;vertical-align:top}
+.tbl th{background:#f2f4f7;font-size:12px;color:var(--mute);font-weight:600}
+.tbl td.r,.tbl th.r{text-align:right;white-space:nowrap}
+.tbl tr.sub td{background:#f8fafc;font-weight:600;font-size:13px;color:var(--pri)}
+.tbl tr.click{cursor:pointer}
+.tbl tr.click:hover td{background:#f5f8ff}
+.wrap{overflow-x:auto}
+.bar{height:6px;background:#eef1f5;border-radius:3px;overflow:hidden;margin-top:4px;min-width:60px}
+.bar i{display:block;height:100%;background:var(--ok)}
+.pill{display:inline-block;padding:2px 8px;border-radius:12px;font-size:12px;background:#eef1f5;white-space:nowrap}
+.detail{background:#fbfcfe;padding:10px 12px;font-size:14px;white-space:pre-wrap;margin:0}
+.detail dt{font-weight:600;color:var(--mute);font-size:12px;margin-top:8px}
+.detail dd{margin:2px 0 0}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.right{margin-left:auto}
+.msg{padding:12px;border-radius:8px;margin-top:12px}
+.msg.ok{background:#dcfae6;color:#05603a}.msg.err{background:#fee4e2;color:#912018}
+.loading{padding:30px;text-align:center;color:var(--mute)}
+a{color:var(--pri)}
+.hero{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-top:10px}
+.hero .big{font-size:34px;font-weight:700;color:var(--ok);line-height:1}
+.hero .big small{font-size:14px;color:var(--mute);font-weight:400;display:block;margin-top:4px}
+.hero .barw{flex:1;min-width:220px}
+.hero .bar{margin-top:0;height:10px;border-radius:5px}
+.stats{display:flex;gap:22px;flex-wrap:wrap;margin-top:10px;font-size:14px;color:var(--mute)}
+.stats b{display:block;font-size:17px;color:var(--ink)}
+.list{width:100%;border-collapse:collapse;margin-top:6px}
+.list td{padding:11px 6px;border-top:1px solid var(--line);vertical-align:middle}
+.list tr{cursor:pointer}.list tr:hover td{background:#f5f8ff}
+.list .nm{font-weight:600}.list .nm div{font-weight:400;font-size:12px;color:var(--mute)}
+.list .n{text-align:right;white-space:nowrap;font-weight:600}
+.list .t{text-align:right;white-space:nowrap;color:var(--mute);font-size:13px}
+.list .go{color:var(--mute);width:16px;text-align:right}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.chip{border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;font-size:13px}
+.chip.on{background:var(--pri);color:#fff;border-color:var(--pri)}
+.fl{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-top:8px}
+.fl label{margin:0 0 2px;font-size:12px;color:var(--mute);font-weight:600}
+.who{font-size:12px;color:var(--mute);margin-top:2px}
+.who b{color:var(--ink);font-weight:600}
+.thieu{color:var(--warn)}
+@media (max-width:640px){.hide-sm{display:none}.tbl{font-size:13px}}
+</style>
+<script>
+// Cầu nối: trang này nằm ngoài Google nên gọi chương trình Apps Script qua mạng, không gửi tài khoản Google
+// (tránh lỗi "/u/1/ – không thể mở tệp" khi máy đăng nhập nhiều tài khoản).
+const API_URL = 'https://script.google.com/macros/s/AKfycbynHwvrBG8jBrutF-KMXoCTvcKU6AWweDvakzbMLNdDqKGR_pVjFVkfbNrcNK3rD08q/exec';
+const GET_API = {
+  getFormInfo: () => ({ api: 'form' }),
+  getTongQuan: (nam, force) => ({ api: 'tq', nam: nam || '', force: force ? '1' : '' }),
+  getHangCho: (tatCa) => ({ api: 'hc', tatCa: tatCa ? '1' : '' }),
+  getKiemTra: (force) => ({ api: 'kt', force: force ? '1' : '' })
+};
+function goiApi_(fn, args) {
+  const req = GET_API[fn]
+    ? fetch(API_URL + '?' + new URLSearchParams(GET_API[fn](...args)), { credentials: 'omit' })
+    : fetch(API_URL, { method: 'POST', credentials: 'omit', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn: fn, args: args }) });
+  return req.then(r => { if (!r.ok) throw new Error('Máy chủ trả lỗi ' + r.status); return r.json(); })
+    .then(j => { if (!j.ok) throw new Error(j.err || 'Lỗi không rõ'); return j.data; })
+    .catch(e => { throw new Error(/Failed to fetch|NetworkError|Load failed/i.test(e.message) ? 'Không kết nối được, kiểm tra mạng rồi thử lại.' : e.message); });
+}
+window.google = { script: { get run() {
+  let ok = () => {}, no = () => {};
+  const p = new Proxy({}, { get(_, k) {
+    if (k === 'withSuccessHandler') return f => { ok = f; return p; };
+    if (k === 'withFailureHandler') return f => { no = f; return p; };
+    return (...a) => { goiApi_(k, a).then(ok, no); };
+  } });
+  return p;
+} } };
+</script></head>
+<body>
+<header>
+  <div class="row"><div><h1>Ban quản lý dự án đầu tư xây dựng xã Củ Chi</h1><div class="sub" id="sub">Ban QLDA đầu tư xây dựng xã Củ Chi</div></div>
+  <div class="right row"><select id="nam" style="width:auto;padding:6px 8px"></select><button class="ghost" style="padding:6px 10px" onclick="tai(true)">Làm mới</button></div></div>
+</header>
+<div class="tabs" id="tabs">
+  <button data-t="tq" class="on">Tổng quan</button><button data-t="da">Dự án</button>
+  <button data-t="ntm">Dự án NTM</button><button data-t="th">Trung hạn 2026–2030</button><button data-t="vb">Văn bản pháp luật</button>
+</div>
+<main id="main"><div class="loading">Đang tải số liệu…</div></main>
+<script>
+let D = null, TAB = 'tq', OPEN = {}, ROW = {};
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const f0 = n => (n || n === 0) ? Number(n).toLocaleString('vi-VN', { maximumFractionDigits: 0 }) : '';
+const pct = (a, b) => b ? (Math.round(a / b * 1000) / 10).toLocaleString('vi-VN') : 0;
+const pctN = (a, b) => b ? Math.round(a / b * 1000) / 10 : 0;
+const ty = n => (n / 1e9).toLocaleString('vi-VN', { maximumFractionDigits: 2 }) + ' tỷ';
+const tr = n => (n / 1000).toLocaleString('vi-VN', { maximumFractionDigits: 2 }) + ' tỷ';
+const NHOM = ['dtc', 'ctx', 'pctt'];
+
+document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => { TAB = b.dataset.t; document.querySelectorAll('#tabs button').forEach(x => x.classList.toggle('on', x === b)); ve(); });
+$('#nam').onchange = () => tai(false);
+
+function tai(force) {
+  $('#main').innerHTML = '<div class="loading">Đang tải số liệu…</div>';
+  google.script.run.withSuccessHandler(d => {
+    D = d;
+    const s = $('#nam');
+    if (!s.options.length) d.namList.forEach(y => s.add(new Option('Năm ' + y, y, false, y === d.nam)));
+    $('#sub').textContent = 'Năm ' + d.nam + (d.nam === d.namHienTai ? ' (năm hiện tại)' : '') + ' · số liệu lúc ' + d.capNhat;
+    ve();
+  }).withFailureHandler(e => $('#main').innerHTML = '<div class="msg err">' + esc(e.message) + '</div>')
+    .getTongQuan($('#nam').value || null, !!force);
+}
+function grp(id, title, sum, body) {
+  return `<div class="grp ${OPEN[id] ? 'open' : ''}" id="${id}"><div class="hd" onclick="OPEN['${id}']=!OPEN['${id}'];this.parentNode.classList.toggle('open')"><b><span class="chev">›</span>${title}</b><span class="s">${sum}</span></div><div class="bd">${body}</div></div>`;
+}
+function ve() {
+  const m = $('#main');
+  if (!D) return;
+  const loi = (D.loi || []).length ? `<div class="msg err">Chưa đọc được: ${D.loi.map(esc).join('; ')}</div>` : '';
+  m.innerHTML = loi + ({ tq: veTQ, da: veDA, ntm: veNTM, th: veTH, vb: veVB }[TAB])();
+}
+
+// ---------- TỔNG QUAN ----------
+function sumNhom(k) {
+  const ds = D.tienDo.nhom[k].duAn;
+  return { n: ds.length, tmdt: ds.reduce((a, x) => a + x.tmdt, 0), khv: ds.reduce((a, x) => a + x.khv, 0), gn: ds.reduce((a, x) => a + x.gn, 0) };
+}
+function veTQ() {
+  if (!D.tienDo) return '';
+  const t = D.tienDo.tong || sumNhom('dtc');
+  const nhanGN = (D.tienDo.nhanGN || '').replace(/^KHV\s+/i, '');
+  let h = `<div class="card"><b>Vốn đầu tư công năm ${D.nam}</b><div class="muted">${esc(nhanGN)} · triệu đồng</div>
+    <div class="hero"><div class="big">${pct(t.gn, t.khv)}%<small>tỷ lệ giải ngân</small></div>
+      <div class="barw"><div class="bar"><i style="width:${Math.min(100, pctN(t.gn, t.khv))}%"></i></div>
+      <div class="stats"><span><b>${f0(t.khv)}</b>KHV đã giao</span><span><b>${f0(t.gn)}</b>Đã giải ngân</span><span><b>${f0(t.khv - t.gn)}</b>Còn lại</span></div></div></div></div>`;
+  const rows = [];
+  NHOM.forEach(k => { const s = sumNhom(k); rows.push([`moNhom('${k}')`, D.tienDo.nhom[k].ten, s.khv ? 'Giải ngân ' + pct(s.gn, s.khv) + '%' : '', s.n, s.tmdt]); });
+  const N = dsNTM();
+  if (N.length) {
+    const thieu = N.filter(x => !x.kyThuat || !x.keToan).length;
+    rows.push([`chuyen('ntm')`, 'Nông thôn mới 2026–2030', thieu ? `<span class="thieu">${thieu} dự án chưa ghi đủ người phụ trách</span>` : 'Lọc theo kỹ thuật, kế toán', N.length, N.reduce((a, x) => a + tmNTM(x), 0)]);
+  }
+  if (D.trungHan && D.trungHan.tong) rows.push([`chuyen('th')`, 'Danh mục trung hạn 2026–2030', 'KHV trung hạn ' + tr(D.trungHan.tong.th), D.trungHan.nhom.reduce((a, g) => a + g.duAn.length, 0), 0]);
+  h += `<div class="card"><b>Các nhóm dự án</b><div class="muted">Bấm vào dòng để xem danh sách</div><table class="list">` +
+    rows.map(r => `<tr onclick="${r[0]}"><td class="nm">${esc(r[1])}<div>${r[2]}</div></td><td class="n">${r[3]} dự án</td><td class="t hide-sm">${r[4] ? 'TMĐT ' + tr(r[4]) : ''}</td><td class="go">›</td></tr>`).join('') + '</table></div>';
+  if (D.dauThau) {
+    const x = D.dauThau;
+    h += `<div class="card"><b>Lựa chọn nhà thầu năm ${D.nam}</b><div class="stats"><span><b>${x.soGoi}</b>Gói thầu</span><span><b>${ty(x.tongGia)}</b>Giá gói thầu</span><span><b>${ty(x.tongTrung)}</b>Giá trúng thầu</span><span><b style="color:var(--ok)">${ty(x.tietKiem)}</b>Tiết kiệm${x.soTK ? ' (' + x.soTK + ' gói có kết quả)' : ''}</span></div>
+      ${x.chuaGan ? `<div class="muted" style="margin-top:8px;color:var(--warn)">${x.chuaGan} gói thầu chưa gắn được vào dự án.</div>` : ''}</div>`;
+  }
+  return h;
+}
+function chuyen(t) { document.querySelector(`#tabs button[data-t="${t}"]`).click(); }
+function moNhom(k) { OPEN['g_' + k] = true; chuyen('da'); setTimeout(() => { const e = document.getElementById('g_' + k); if (e) e.scrollIntoView(); }, 50); }
+
+// ---------- DỰ ÁN ----------
+function veDA() {
+  if (!D.tienDo) return '';
+  const t = D.tienDo.tong;
+  let h = t ? `<div class="card"><b>Vốn đầu tư công</b> <span class="muted">(triệu đồng)</span><div class="row muted" style="margin-top:4px">KHV giao ${f0(t.khv)} · đã giải ngân ${f0(t.gn)} (${pct(t.gn, t.khv)}%) · còn lại ${f0(t.khv - t.gn)}</div></div>` : '';
+  NHOM.forEach(k => {
+    const g = D.tienDo.nhom[k], s = sumNhom(k);
+    if (!g.duAn.length) return;
+    const sum = `${s.n} dự án${s.tmdt ? ' · TMĐT ' + f0(s.tmdt) : ''}${s.khv ? '<br>GN ' + f0(s.gn) + '/' + f0(s.khv) + ' (' + pct(s.gn, s.khv) + '%)' : ''}`;
+    h += grp('g_' + k, g.ten, sum, bangDA(k, g.duAn));
+  });
+  return h;
+}
+function bangDA(k, ds) {
+  const pn = x => (x.phanNhom || 'Khác').replace(/\s+/g, ' ').trim().replace(/^./, c => c.toUpperCase());
+  const sorted = ds.slice().sort((a, b) => pn(a).localeCompare(pn(b), 'vi'));
+  const coVon = ds.some(x => x.khv);
+  let cur = null, i = 0;
+  let h = `<div class="wrap"><table class="tbl"><tr><th>STT</th><th>Tên dự án</th><th class="hide-sm">Phân nhóm</th><th class="r">TMĐT</th>${coVon ? '<th class="r">GN / KHV</th>' : '<th class="hide-sm">Dự kiến HT</th>'}</tr>`;
+  sorted.forEach(x => {
+    const p = pn(x);
+    if (p.toLowerCase() !== (cur || '').toLowerCase()) { cur = p; h += `<tr class="sub"><td colspan="5">${esc(p)}</td></tr>`; }
+    i++;
+    const id = k + '_' + i;
+    h += `<tr class="click" onclick="ROW['${id}']=!ROW['${id}'];ve()"><td>${i}</td><td>${esc(x.ten)}<div class="muted">${esc((x.tienDo || '').split('\n')[0].slice(0, 120))}</div></td><td class="hide-sm">${esc(p)}</td><td class="r">${f0(x.tmdt)}</td>` +
+      (coVon ? `<td class="r">${f0(x.gn)} / ${f0(x.khv)}<div class="bar"><i style="width:${Math.min(100, pctN(x.gn, x.khv))}%"></i></div><span class="muted">${pct(x.gn, x.khv)}%</span></td>` : `<td class="hide-sm">${esc(x.duKienHT)}</td>`) + `</tr>`;
+    if (ROW[id]) h += `<tr><td colspan="5">${chiTietDA(x)}</td></tr>`;
+  });
+  return h + '</table></div>';
+}
+function chiTietDA(x) {
+  const f = [['Mã dự án', x.ma], ['Nguồn vốn', x.nguonVon], ['Chủ trương đầu tư', x.chuTruong], ['QĐ phê duyệt dự án', x.qdDuAn],
+    ['Tiến độ hiện tại', x.tienDo], ['Dự kiến hoàn thành', x.duKienHT], ['Công việc tuần kế tiếp', x.tuanToi],
+    ['Khó khăn, vướng mắc', x.khoKhan], ['Đề xuất', x.deXuat], ['Ghi chú', x.ghiChu], ['Đơn vị thực hiện', x.donVi]];
+  let h = '<dl class="detail">' + f.filter(a => a[1]).map(a => `<dt>${a[0]}</dt><dd>${esc(a[1])}</dd>`).join('') + '</dl>';
+  if (x.goi && x.goi.length) {
+    h += `<div class="wrap"><table class="tbl"><tr><th>STT</th><th>Gói thầu</th><th class="r">Giá gói (đ)</th><th class="r">Giá trúng (đ)</th><th class="hide-sm">Nhà thầu</th></tr>` +
+      x.goi.map((g, i) => `<tr><td>${i + 1}</td><td>${esc(g.ten)}<div class="muted">${esc([g.ma, g.hinhThuc, g.ngay].filter(Boolean).join(' · '))}</div></td><td class="r">${f0(g.gia)}</td><td class="r">${g.trung ? f0(g.trung) : ''}</td><td class="hide-sm">${esc(g.nhaThau)}</td></tr>`).join('') + '</table></div>';
+  }
+  return h;
+}
+
+
+// ---------- DỰ ÁN NTM ----------
+// Lấy từ tab "Trung hạn 26-30": các dự án có nguồn vốn thuộc Chương trình xây dựng nông thôn mới (CTTH XNTM).
+let FN = { kt: '', kto: '', dv: '', q: '' };
+function nhomNTM() { return D && D.trungHan ? D.trungHan.nhom.filter(g => /XNTM|NTM|nông thôn mới/i.test(g.ten)) : []; }
+function dsNTM() { return nhomNTM().reduce((a, g) => a.concat(g.duAn), []); }
+function tmNTM(x) { return x.tmdtQD || x.tmdtCT || 0; }
+function demTheo(ds, k) {
+  const m = {};
+  ds.forEach(x => { const v = (x[k] || '').trim() || '(chưa ghi)'; m[v] = (m[v] || 0) + 1; });
+  return Object.keys(m).sort((a, b) => (a === '(chưa ghi)') - (b === '(chưa ghi)') || m[b] - m[a] || a.localeCompare(b, 'vi')).map(v => [v, m[v]]);
+}
+function locNTM(ds) {
+  const q = FN.q.trim().toLowerCase();
+  const khop = (v, f) => !f || (f === '(chưa ghi)' ? !(v || '').trim() : (v || '').trim() === f);
+  return ds.filter(x => khop(x.kyThuat, FN.kt) && khop(x.keToan, FN.kto) && khop(x.donVi, FN.dv) &&
+    (!q || (x.ten + ' ' + (x.quyMo || '')).toLowerCase().includes(q)));
+}
+function setFN(k, v) { FN[k] = FN[k] === v ? '' : v; ve(); }
+function veNTM() {
+  const N = dsNTM();
+  if (!N.length) return '<div class="card">Chưa có dự án NTM trong tab Trung hạn 26-30.</div>';
+  const nguon = nhomNTM().map(g => g.ten).join(', ');
+  const can = N.map(x => x.ma).filter(Boolean)[0] || '';
+  const tm = N.reduce((a, x) => a + tmNTM(x), 0);
+  const thieu = N.filter(x => !x.kyThuat || !x.keToan).length;
+  const opt = (k, ten) => `<div><label>${ten}</label><select onchange="FN['${k === 'kyThuat' ? 'kt' : k === 'keToan' ? 'kto' : 'dv'}']=this.value;ve()"><option value="">Tất cả</option>` +
+    demTheo(N, k).map(([v, n]) => `<option value="${esc(v)}" ${FN[k === 'kyThuat' ? 'kt' : k === 'keToan' ? 'kto' : 'dv'] === v ? 'selected' : ''}>${esc(v)} (${n})</option>`).join('') + '</select></div>';
+  const chips = (k, fk, ten) => `<div style="margin-top:10px"><span class="muted">${ten}:</span><div class="chips">` +
+    demTheo(N, k).map(([v, n]) => `<button class="chip ${FN[fk] === v ? 'on' : ''}" onclick="setFN('${fk}','${esc(v).replace(/'/g, "\\'")}')">${esc(v)} · ${n}</button>`).join('') + '</div></div>';
+  let h = `<div class="card"><b>Dự án nông thôn mới (NTM) giai đoạn 2026–2030</b><div class="muted">${esc(nguon)}${can ? ' · ' + esc(can) : ''} · triệu đồng</div>
+    <div class="kpis" style="margin-top:8px">
+      <div class="kpi"><div class="n">${N.length}</div><div class="l">Dự án</div></div>
+      <div class="kpi"><div class="n">${f0(tm)}</div><div class="l">Tổng mức đầu tư (${tr(tm)})</div></div>
+      <div class="kpi"><div class="n ${thieu ? 'thieu' : ''}">${thieu}</div><div class="l">Chưa ghi đủ kỹ thuật / kế toán</div></div>
+    </div>
+    ${chips('kyThuat', 'kt', 'Cán bộ kỹ thuật (bấm tên để lọc)')}
+    ${chips('keToan', 'kto', 'Kế toán (bấm tên để lọc)')}
+  </div>`;
+  const L = locNTM(N), tmL = L.reduce((a, x) => a + tmNTM(x), 0);
+  const coLoc = FN.kt || FN.kto || FN.dv || FN.q;
+  h += `<div class="card"><div class="fl">${opt('kyThuat', 'Cán bộ kỹ thuật')}${opt('keToan', 'Kế toán')}${opt('donVi', 'Đơn vị khảo sát')}
+      <div><label>Tìm tên dự án</label><input id="ntmq" value="${esc(FN.q)}" placeholder="VD: đường số 23" oninput="FN.q=this.value;veDSNTM()"></div></div>
+    <div class="row" style="margin-top:8px"><span class="muted" id="ntmdem"></span>${coLoc ? '<button class="ghost right" style="padding:4px 10px" onclick="FN={kt:\'\',kto:\'\',dv:\'\',q:\'\'};ve()">Bỏ lọc</button>' : ''}</div></div>
+    <div class="grp open"><div class="bd" id="ntmds"></div></div>`;
+  setTimeout(veDSNTM, 0);
+  return h;
+}
+function veDSNTM() {
+  const box = document.getElementById('ntmds'); if (!box) return;
+  const L = locNTM(dsNTM()), tmL = L.reduce((a, x) => a + tmNTM(x), 0);
+  document.getElementById('ntmdem').textContent = `Đang hiện ${L.length} dự án · TMĐT ${f0(tmL)} triệu đồng`;
+  if (!L.length) { box.innerHTML = '<div class="loading">Không có dự án phù hợp.</div>'; return; }
+  let h = `<div class="wrap"><table class="tbl"><tr><th>STT</th><th>Tên dự án</th><th class="r">TMĐT</th><th class="hide-sm">KC–HT</th><th>Phụ trách</th></tr>`;
+  L.forEach((x, i) => {
+    const id = 'ntm_' + (x.ten || i);
+    const kt = x.kyThuat ? esc(x.kyThuat) : '<span class="thieu">chưa ghi</span>';
+    const kto = x.keToan ? esc(x.keToan) : '<span class="thieu">chưa ghi</span>';
+    h += `<tr class="click" onclick="ROW['${esc(id).replace(/'/g, "\\'")}']=!ROW['${esc(id).replace(/'/g, "\\'")}'];veDSNTM()"><td>${i + 1}</td><td>${esc(x.ten)}</td><td class="r">${f0(tmNTM(x))}</td><td class="hide-sm" style="white-space:nowrap">${esc(x.tg || x.tgCT)}</td>` +
+      `<td><div class="who">KT: <b>${kt}</b></div><div class="who">KTo: <b>${kto}</b></div></td></tr>`;
+    if (ROW[id]) h += `<tr><td colspan="5"><dl class="detail">${[['Quy mô', x.quyMo], ['Căn cứ', x.ma], ['Chủ trương đầu tư', x.chuTruong], ['QĐ đầu tư', x.qdDT], ['Thời gian KC–HT', x.tg || x.tgCT], ['Đơn vị thực hiện khảo sát', x.donVi], ['Cán bộ kỹ thuật', x.kyThuat], ['Kế toán', x.keToan], ['Ghi chú', x.ghiChu]].filter(a => a[1]).map(a => `<dt>${esc(a[0])}</dt><dd>${esc(a[1])}</dd>`).join('')}</dl></td></tr>`;
+  });
+  box.innerHTML = h + '</table></div><div class="muted" style="padding:8px 12px">KT: cán bộ kỹ thuật · KTo: kế toán · bấm dòng để xem chi tiết</div>';
+}
+
+// ---------- TRUNG HẠN ----------
+function veTH() {
+  const T = D.trungHan;
+  if (!T) return '<div class="card">Chưa có số liệu trung hạn.</div>';
+  const t = T.tong || {};
+  // KHV năm và giải ngân lấy từ tab Tiến độ (số đang cập nhật hằng tuần), không lấy dòng tổng của tab Trung hạn.
+  const n = (D.tienDo && D.tienDo.tong) ? D.tienDo.tong : null;
+  let h = `<div class="card"><b>Kế hoạch đầu tư công trung hạn 2026–2030</b><div class="muted">${esc(T.nhanTH)} · triệu đồng</div><div class="kpis" style="margin-top:8px">
+    <div class="kpi"><div class="n">${f0(t.th)}</div><div class="l">KHV trung hạn 2026–2030</div></div>
+    ${n ? `<div class="kpi"><div class="n">${f0(n.khv)}</div><div class="l">KHV năm ${D.nam} đã giao</div></div>
+    <div class="kpi"><div class="n">${f0(n.gn)}</div><div class="l">Đã giải ngân năm ${D.nam}</div></div>` : ''}</div></div>`;
+  let stt = 0;
+  T.nhom.forEach((g, gi) => {
+    const th = g.duAn.reduce((a, x) => a + x.th, 0);
+    let body = `<div class="wrap"><table class="tbl"><tr><th>STT</th><th>Tên dự án</th><th class="hide-sm">Lĩnh vực</th><th class="r">TMĐT</th><th class="r">KHV trung hạn</th></tr>`;
+    g.duAn.forEach((x, i) => {
+      stt++;
+      const id = 'th_' + gi + '_' + i;
+      body += `<tr class="click" onclick="ROW['${id}']=!ROW['${id}'];ve()"><td>${stt}</td><td>${esc(x.ten)}</td><td class="hide-sm">${esc(x.linhVuc)}</td><td class="r">${f0(x.tmdtQD || x.tmdtCT)}</td><td class="r">${f0(x.th)}</td></tr>`;
+      if (ROW[id]) body += `<tr><td colspan="5"><dl class="detail">${[['Mã dự án', x.ma], ['Quy mô', x.quyMo], ['Chủ trương đầu tư', x.chuTruong], ['QĐ đầu tư', x.qdDT], ['Thời gian KC–HT', x.tg || x.tgCT], [T.nhanNam + ' đã giao', x.khvNam ? f0(x.khvNam) : ''], ['Đã giải ngân', x.gn ? f0(x.gn) : ''], ['Ghi chú', x.ghiChu], ['Đơn vị thực hiện', x.donVi]].filter(a => a[1]).map(a => `<dt>${esc(a[0])}</dt><dd>${esc(a[1])}</dd>`).join('')}</dl></td></tr>`;
+    });
+    h += grp('th_' + gi, esc(g.ten), `${g.duAn.length} dự án${th ? ' · ' + f0(th) : ''}`, body + '</table></div>');
+  });
+  return h;
+}
+
+// ---------- VĂN BẢN PHÁP LUẬT ----------
+function veVB() {
+  const V = D.vanBan || [];
+  const map = {}, order = [];
+  V.forEach(x => { const k = (x.linhVuc || 'Khác').split(';')[0].trim(); if (!map[k]) { map[k] = []; order.push(k); } map[k].push(x); });
+  let h = `<div class="card"><b>Văn bản pháp luật về quản lý dự án vốn ngân sách</b><div class="muted">${V.length} văn bản · bấm “Chi tiết” để xem trách nhiệm của chủ đầu tư · bấm số hiệu để mở trên Thư viện pháp luật</div></div>`;
+  let stt = 0;
+  order.forEach((k, gi) => {
+    let body = `<div class="wrap"><table class="tbl"><tr><th>STT</th><th>Số hiệu</th><th>Tên văn bản</th><th class="hide-sm">Hiệu lực</th><th></th></tr>`;
+    map[k].forEach((x, i) => {
+      stt++;
+      const id = 'vb_' + gi + '_' + i;
+      const link = 'https://thuvienphapluat.vn/page/tim-van-ban.aspx?keyword=' + encodeURIComponent(x.soHieu) + '&match=True';
+      body += `<tr><td>${stt}</td><td style="white-space:nowrap"><a href="${link}" target="_blank">${esc(x.soHieu)}</a></td><td>${esc(x.ten)}<div class="muted">${esc(x.coQuan)} · ${esc(x.ngayBH)} · <span class="pill">${esc(x.tinhTrang)}</span></div></td><td class="hide-sm">${esc(x.hieuLuc)}</td><td><button class="ghost" style="padding:4px 10px" onclick="ROW['${id}']=!ROW['${id}'];ve()">${ROW[id] ? 'Thu gọn' : 'Chi tiết'}</button></td></tr>`;
+      if (ROW[id]) body += `<tr><td colspan="5"><dl class="detail">${[['Trách nhiệm, nghĩa vụ của chủ đầu tư', x.trachNhiem], ['Làm căn cứ cho', x.canCu], ['Thay thế / sửa đổi', x.thayThe], ['Lĩnh vực', x.linhVuc], ['Ngày rà soát', x.ngayRS]].filter(a => a[1]).map(a => `<dt>${a[0]}</dt><dd>${esc(a[1])}</dd>`).join('')}</dl></td></tr>`;
+    });
+    h += grp('vb_' + gi, esc(k), map[k].length + ' văn bản', body + '</table></div>');
+  });
+  return h;
+}
+tai(false);
+</script>
+</body></html>
