@@ -243,6 +243,22 @@ a{color:var(--navy2)}
 .thd-h>div:first-child{flex:1 1 380px;min-width:0}.thd-a{flex:0 0 auto;flex-wrap:nowrap}.srch{margin:0!important;font-weight:400}.srch input{width:160px}
 .dah{grid-template-columns:auto 1fr minmax(360px,auto)!important}@media(max-width:900px){.dah{grid-template-columns:1fr!important}}
 .dap .xda{margin-left:10px;white-space:nowrap;padding:7px 12px;font-size:13px}
+
+/* Tab Trung hạn nền sáng, dải tiêu đề navy */
+.thd{background:#fff!important;color:var(--ink)!important;border:1px solid var(--goldl)!important;box-shadow:0 2px 10px rgba(15,42,74,.06)!important;padding:0 0 18px!important;overflow:hidden}
+.thd-h{background:linear-gradient(120deg,#0a1d36,#0f2a4a 60%,#163a63);border-bottom:3px solid var(--gold);padding:18px 22px;align-items:center}
+.thd-k,.thd-b{padding:0 18px}
+.thd .kc{background:#fff!important;border:1px solid var(--goldl)!important;box-shadow:0 1px 4px rgba(15,42,74,.05)!important;border-top:3px solid var(--gold)!important}
+.thd .kt{color:var(--pri)!important}.thd .kt span{color:var(--gold)!important}.thd .kt small{color:var(--mute)!important}
+.thd .kv{color:var(--pri)!important}.thd .c2 .kv{color:#1d4e89!important}.thd .c3 .kv{color:var(--ok)!important}
+.thd .kv em{background:#eef1f6!important;color:var(--pri)!important}.thd .c3 .kv em{background:#e3f3ea!important;color:var(--ok)!important}
+.thd .c3{background:#fff!important;border-top-color:var(--ok)!important}
+.kp{background:#e9edf4!important}.kp i{background:linear-gradient(90deg,#1d4e89,#4f86c6)!important}
+.kd i{background:#e3efe8!important}.kd i.on{background:#1a7f4b!important}.kd i.half{background:#7cc79c!important}
+.dnw svg{filter:none!important}.lgd{color:var(--ink)!important}
+.nv{background:#fff!important;border:1px solid #e4e7ec!important}.nv:hover{border-color:var(--gold)!important;background:#fbf8f1!important}
+.nv b{color:var(--ink)!important}.nv .vl{color:var(--pri)!important}.nv .cpb{color:var(--mute)!important}.nv .cv{color:var(--gold)!important}
+.nv .pill{background:#f7f1e4!important;border-color:rgba(184,137,59,.35)!important;color:#7a5a22!important}
 </style>
 <script>
 // Cầu nối: trang này nằm ngoài Google nên gọi chương trình Apps Script qua mạng, không gửi tài khoản Google
@@ -732,8 +748,8 @@ function veTH() {
     </div>
     <div class="thd-b">
       <div class="kc"><div class="kt">Tỷ trọng nguồn vốn <small>theo KHV trung hạn</small></div>
-        <div class="dnw"><svg viewBox="0 0 220 220" width="220" height="220"><circle cx="110" cy="110" r="${R}" fill="none" stroke="#1e293b" stroke-width="26"/>${vong}
-          <text x="110" y="112" text-anchor="middle" font-size="34" font-weight="700" fill="#fff">${soDA}</text><text x="110" y="134" text-anchor="middle" font-size="13" fill="#94a3b8">dự án</text></svg></div>
+        <div class="dnw"><svg viewBox="0 0 220 220" width="220" height="220"><circle cx="110" cy="110" r="${R}" fill="none" stroke="#eef1f5" stroke-width="26"/>${vong}
+          <text x="110" y="112" text-anchor="middle" font-size="34" font-weight="700" fill="#0f2a4a">${soDA}</text><text x="110" y="134" text-anchor="middle" font-size="13" fill="#667085">dự án</text></svg></div>
         <div class="lgd">${G.map(g => `<span><i style="background:${g.mau}"></i>${esc(g.ten.length > 22 ? g.ten.slice(0, 20) + '…' : g.ten)}</span>`).join('')}</div></div>
       <div class="kc"><div class="kt">Danh sách nguồn vốn (${G.length} nhóm)</div><div class="nvl">` +
         G.map(g => `<div class="nv" onclick="moNhomTH(${g.gi})"><i style="background:${g.mau}"></i><b>${esc(g.ten)}</b><span class="pill">${g.n} dự án</span><span class="vl">${g.th ? f0(g.th) : '<span class="cpb">Chưa phân bổ</span>'}</span><span class="cv">›</span></div>`).join('') +
