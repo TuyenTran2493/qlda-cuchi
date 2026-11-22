@@ -51,6 +51,15 @@ button:disabled{opacity:.5;cursor:default}
 .msg.ok{background:#dcfae6;color:#05603a}.msg.err{background:#fee4e2;color:#912018}
 .loading{padding:30px;text-align:center;color:var(--mute)}
 a{color:var(--pri)}
+.ac{position:relative}
+.ac .ds{position:absolute;left:0;right:0;top:100%;background:#fff;border:1px solid #cfd4dc;border-radius:8px;margin-top:2px;z-index:20;box-shadow:0 4px 12px rgba(0,0,0,.08);display:none}
+.ac .ds div{padding:9px 10px;cursor:pointer}
+.ac .ds div:hover,.ac .ds div.on{background:var(--pri2)}
+input.tudien{background:#ecfdf3;border-color:#75e0a7}
+input.lech{border-color:var(--bad);background:#fff6f5}
+input.lech::placeholder{color:var(--bad);opacity:1}
+.ghichu{font-size:12px;margin-top:3px}
+.ghichu.ok{color:var(--ok)}.ghichu.bad{color:var(--bad)}
 @media (max-width:640px){.hide-sm{display:none}.tbl{font-size:13px}}
 </style>
 <script>
@@ -88,10 +97,109 @@ window.google = { script: { get run() {
 </main>
 <script>
 let INFO = null;
+const NGUOI_GUI = ['Trần Đình Quí', 'Nguyễn Đặng Son', 'Trần Bích Tuyền', 'Lê Thành Tâm', 'Huỳnh Nghĩa Bình', 'Lại Như Khoa', 'Trần Duy Hồng', 'Nguyễn Thị Mỹ Duyên'];
+// Bỏ dấu, chữ thường, bỏ ký tự thừa để so tên (gõ "tuyen" vẫn ra "Trần Bích Tuyền").
+const chuan = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[đĐ]/g, 'd')
+  .toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+// Danh sách gói thầu từ sheet "Đấu thầu" (lấy qua trang tổng quan): { tênCôngTrìnhChuẩn: { ten, goi:[{ten, ma}] } }
+let GOI = null;
+function taiGoi() {
+  google.script.run.withSuccessHandler(d => {
+    GOI = {};
+    try {
+      Object.values(d.tienDo.nhom).forEach(n => (n.duAn || []).forEach(da => {
+        const k = chuan(da.ten);
+        if (!GOI[k]) GOI[k] = { ten: da.ten, goi: [] };
+        (da.goi || []).forEach(g => GOI[k].goi.push({ ten: String(g.ten || '').trim(), ma: String(g.ma || '').replace(/\s+/g, ' ').trim() }));
+      }));
+    } catch (e) { GOI = null; }
+    capNhatGoiDS(); tuDienMa();
+  }).withFailureHandler(() => { GOI = null; }).getTongQuan('', false);
+}
+// Gợi ý chọn trong danh sách: gõ vài chữ (không cần dấu) là hiện tên khớp.
+function goiY(input, layDS, sauKhiChon) {
+  const w = document.createElement('div'); w.className = 'ac';
+  input.parentNode.insertBefore(w, input); w.appendChild(input);
+  const ds = document.createElement('div'); ds.className = 'ds'; w.appendChild(ds);
+  let chon = -1, kq = [];
+  const dong = () => { ds.style.display = 'none'; chon = -1; };
+  const lay = v => { input.value = v; dong(); if (sauKhiChon) sauKhiChon(); };
+  const ve = () => {
+    const q = chuan(input.value);
+    kq = layDS().filter(t => !q || chuan(t).includes(q) || chuan(t).split(' ').some(w => w.startsWith(q))).slice(0, 12);
+    if (!kq.length || (kq.length === 1 && kq[0] === input.value)) { dong(); return; }
+    ds.innerHTML = kq.map((t, i) => `<div data-k="${i}" class="${i === chon ? 'on' : ''}">${esc(t)}</div>`).join('');
+    ds.style.display = 'block';
+  };
+  input.setAttribute('autocomplete', 'off');
+  input.addEventListener('input', () => { chon = -1; ve(); });
+  input.addEventListener('focus', ve);
+  input.addEventListener('keydown', e => {
+    if (ds.style.display !== 'block') return;
+    if (e.key === 'ArrowDown') { chon = Math.min(chon + 1, kq.length - 1); ve(); e.preventDefault(); }
+    else if (e.key === 'ArrowUp') { chon = Math.max(chon - 1, 0); ve(); e.preventDefault(); }
+    else if (e.key === 'Enter' && chon >= 0) { lay(kq[chon]); e.preventDefault(); }
+    else if (e.key === 'Escape') dong();
+  });
+  ds.addEventListener('mousedown', e => { const d = e.target.closest('[data-k]'); if (d) { e.preventDefault(); lay(kq[+d.dataset.k]); } });
+  input.addEventListener('blur', () => setTimeout(() => {
+    // Gõ tắt mà chỉ khớp đúng một tên thì tự điền đủ tên.
+    const q = chuan(input.value);
+    if (q && !layDS().some(t => t === input.value)) {
+      const m = layDS().filter(t => chuan(t).includes(q));
+      if (m.length === 1) input.value = m[0];
+    }
+    dong(); if (sauKhiChon) sauKhiChon();
+  }, 150));
+}
+// Ô mã (TBMT / dự thảo HĐ / mã HĐ) của loại việc đang chọn
+const laOMa = t => t.k === 'text' && /m[aã] tbmt|m[aã] d[uự] th[aả]o|m[aã] h[dđ]/i.test(t.nhan);
+function timGoi() {
+  const da = $('#duAn').value, gt = $('#goiThau').value;
+  if (!chuan(da) || !chuan(gt)) return { tt: 'trong' };
+  if (!GOI) return { tt: 'chuaTai' };
+  const p = GOI[chuan(da)];
+  if (!p) return { tt: 'lech', ly: 'tên công trình' };
+  const m = p.goi.filter(g => chuan(g.ten) === chuan(gt));
+  if (!m.length) return { tt: 'lech', ly: 'tên gói thầu' };
+  const ma = [...new Set(m.map(g => g.ma).filter(Boolean))];
+  if (!ma.length) return { tt: 'chuaMa' };
+  return { tt: 'khop', ma: ma.join('; ') };
+}
+function tuDienMa() {
+  const l = INFO && INFO.loai[$('#loai') ? $('#loai').value : ''];
+  if (!l) return;
+  const r = timGoi();
+  l.truong.forEach((t, i) => {
+    if (!laOMa(t)) return;
+    const el = document.querySelector(`[data-i="${i}"]`), gc = document.querySelector(`[data-g="${i}"]`);
+    if (!el || !gc) return;
+    const tuDien = el.dataset.tudien === '1';
+    el.classList.remove('tudien', 'lech'); gc.className = 'ghichu'; gc.textContent = '';
+    if (r.tt === 'khop') {
+      el.value = r.ma; el.dataset.tudien = '1'; el.classList.add('tudien');
+      gc.classList.add('ok'); gc.textContent = '✓ Tự điền theo tên công trình và tên gói thầu';
+      return;
+    }
+    if (tuDien) { el.value = ''; el.dataset.tudien = ''; }
+    if (r.tt === 'lech') {
+      el.classList.add('lech'); el.placeholder = 'Không khớp ' + r.ly + ' – kiểm tra lại tên';
+      gc.classList.add('bad'); gc.textContent = 'Không khớp ' + r.ly + ' với sổ theo dõi đấu thầu, nên không tự điền được mã. Chọn tên trong danh sách gợi ý hoặc ghi đúng như quyết định.';
+    } else if (r.tt === 'chuaMa') {
+      el.placeholder = t.goiY || '';
+      gc.textContent = 'Gói thầu khớp nhưng sổ theo dõi chưa có mã; nếu biết thì ghi vào.';
+    } else el.placeholder = r.tt === 'chuaTai' ? 'Đang tải danh sách gói thầu…' : 'Tự điền khi nhập đúng tên công trình và tên gói thầu';
+  });
+}
+function capNhatGoiDS() {
+  const dl = $('#dsGoi'); if (!dl) return;
+  const p = GOI && GOI[chuan($('#duAn').value)];
+  dl.innerHTML = p ? [...new Set(p.goi.map(g => g.ten))].map(t => `<option value="${esc(t)}">`).join('') : '';
+}
 const $ = s => document.querySelector(s);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-google.script.run.withSuccessHandler(info => { INFO = info; ve(); })
+google.script.run.withSuccessHandler(info => { INFO = info; ve(); taiGoi(); })
   .withFailureHandler(e => $('#box').innerHTML = '<div class="msg err">Lỗi tải phiếu: ' + esc(e.message) + '</div>')
   .getFormInfo();
 
@@ -100,18 +208,24 @@ function ve() {
   try { ten = localStorage.getItem('nguoiGui') || ''; } catch (e) {}
   $('#box').innerHTML = `
     <div class="muted">Mỗi phiếu là một việc cho một gói thầu. Phiếu gửi xong sẽ vào hàng chờ để xử lý.</div>
-    <label>Người gửi <span class="req">*</span></label><input id="nguoiGui" value="${esc(ten)}" placeholder="Họ và tên">
+    <label>Người gửi <span class="req">*</span></label><input id="nguoiGui" value="${esc(ten)}" placeholder="Gõ vài chữ để chọn tên, VD: tuyen">
     <label>Loại việc <span class="req">*</span></label>
     <select id="loai"><option value="">— Chọn loại việc —</option>${INFO.loai.map((l, i) => `<option value="${i}">${esc(l.ten)}</option>`).join('')}</select>
     <label>Dự án <span class="req">*</span></label>
     <input id="duAn" list="dsDuAn" placeholder="Gõ để tìm, hoặc ghi tên dự án">
     <datalist id="dsDuAn">${INFO.duAn.map(d => `<option value="${esc(d)}">`).join('')}</datalist>
-    <label>Gói thầu <span class="req" id="goiReq" style="display:none">*</span></label><input id="goiThau" placeholder="Tên gói thầu (ghi đúng như trong quyết định)">
+    <label>Gói thầu <span class="req" id="goiReq" style="display:none">*</span></label><input id="goiThau" list="dsGoi" placeholder="Tên gói thầu (ghi đúng như trong quyết định)"><datalist id="dsGoi"></datalist>
     <div id="truong"></div>
     <div class="row" style="margin-top:16px"><button id="gui">Gửi phiếu</button><span id="tt" class="muted"></span></div>
     <div id="kq"></div>`;
   $('#loai').onchange = veTruong;
   $('#gui').onclick = gui;
+  goiY($('#nguoiGui'), () => NGUOI_GUI);
+  ['input', 'change'].forEach(ev => {
+    $('#duAn').addEventListener(ev, () => { capNhatGoiDS(); tuDienMa(); });
+    $('#goiThau').addEventListener(ev, tuDienMa);
+  });
+  capNhatGoiDS();
 }
 
 const MAX_MB = 25;
@@ -127,12 +241,14 @@ function veTruong() {
       else if (t.k === 'select') o = `<select data-i="${i}"><option value="">— Chọn —</option>${t.chon.map(c => `<option>${esc(c)}</option>`).join('')}</select>`;
       else if (t.k === 'date') o = `<input type="date" data-i="${i}" onchange="xemNgay(${i})"><div class="muted" data-d="${i}"></div>`;
       else if (t.dai) o = `<textarea data-i="${i}" placeholder="${esc(t.goiY || '')}"></textarea>`;
+      else if (laOMa(t)) o = `<input data-i="${i}" placeholder="${esc(t.goiY || '')}" oninput="this.dataset.tudien='';this.classList.remove('tudien','lech')"><div class="ghichu" data-g="${i}"></div>`;
       else o = `<input data-i="${i}" placeholder="${esc(t.goiY || '')}">`;
       return `<div data-w="${i}">${lab}${o}</div>`;
     }).join('');
   const dk = l.truong.findIndex(t => t.dk);
   if (dk >= 0) document.querySelector(`[data-i="${dk}"]`).onchange = apDK;
   apDK();
+  tuDienMa();
 }
 // Giá trị ô điều khiển (nếu loại việc có) quyết định ô nào ẩn, ô nào bắt buộc.
 function giaTriDK(l) {
@@ -191,7 +307,7 @@ async function gui() {
     } else {
       let val = el.value.trim();
       if (t.k === 'date' && val) { const p = val.split('-'); val = p[2] + '/' + p[1] + '/' + p[0]; }
-      if (bat && !val) loi.push(t.nhan);
+      if (bat && !val) loi.push(laOMa(t) && el.classList.contains('lech') ? t.nhan + ' (tên gói thầu/công trình không khớp nên chưa có mã)' : t.nhan);
       meta.khai.push({ n: t.nhan, v: val });
     }
   });
