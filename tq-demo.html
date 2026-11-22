@@ -226,6 +226,20 @@ header button.ghost{background:transparent!important;color:var(--gold2)!importan
 .nv .pill{background:#1a3358!important;border-color:#2c4a75!important;color:#e8d6ae!important}
 .dnw svg{filter:drop-shadow(0 0 10px rgba(217,178,95,.25))!important}
 a{color:var(--navy2)}
+
+/* Lượt hoàn thiện: biểu tượng nét, màu đồng bộ, thẻ Tổng quan */
+.ico{display:block}.tile .ic,.gda .gt .ic{color:var(--gold)!important;background:#f7f1e4!important;border:1px solid rgba(184,137,59,.35)}
+.tn-dtc .ic,.tn-ctx .ic,.tn-pctt .ic{color:var(--gold)!important;background:#f7f1e4!important}
+.thd .kt span{color:var(--gold2);opacity:.9}.srch .ico{width:16px;height:16px;color:var(--gold2)}.xbc{display:inline-flex;align-items:center;gap:6px}.xbc .ico{width:17px;height:17px}
+.hb .tr i{background:#1d4e89!important}.hb .tr i.w{background:#e0a21b!important}
+.gstats div.a{border-color:#1d4e89!important}.gstats div.b{border-color:var(--ok)!important}
+.dash>.card{border-top:3px solid var(--gold)!important;box-shadow:0 2px 8px rgba(15,42,74,.05)}
+.dash .ct{display:flex;align-items:center;gap:8px;font-weight:700}.dash .ct::before{content:'';width:4px;height:16px;border-radius:2px;background:var(--pri)}
+.tn-ctx{background:linear-gradient(135deg,#fff 45%,#f8f0df)!important}.tn-ctx .bgi{color:#b8893b!important}
+.tn-pctt{background:linear-gradient(135deg,#fff 45%,#e6eff1)!important}.tn-pctt .bgi{color:#2f6f7a!important}
+.tn-dtc{background:linear-gradient(135deg,#fff 45%,#e9edf4)!important}
+.gda.tn-ctx{border-left-color:#b8893b!important}.gda.tn-pctt{border-left-color:#2f6f7a!important}
+.kb i{opacity:1}.kp i{background:linear-gradient(90deg,#4f86c6,#8fb3dd)!important}.thd .c2 .kv{color:#8fb3dd!important}
 </style>
 <script>
 // Cầu nối: trang này nằm ngoài Google nên gọi chương trình Apps Script qua mạng, không gửi tài khoản Google
@@ -331,9 +345,9 @@ function veTQ() {
     ${coNTM ? `<div class="chips">${chip('', 'Tất cả')}${chip('ntm', 'NTM')}${chip('khac', 'Ngoài NTM')}</div>` : ''}
     <div class="hb" style="max-height:236px;overflow:auto">` + ds.map(x => `<div class="r" onmousemove="tip(event,'<b>${esc(x.ten).replace(/'/g, '&#39;')}</b><br>Giải ngân ${f0(x.gn)} / ${f0(x.khv)} triệu')" onmouseleave="tip(event)" onclick="tip(event,'<b>${esc(x.ten).replace(/'/g, '&#39;')}</b><br>Giải ngân ${f0(x.gn)} / ${f0(x.khv)} triệu')">
       <div class="nm">${esc(x.ten)}</div><div class="tr"><i class="${x.p < 50 ? 'w' : ''}" style="width:${Math.min(100, x.p)}%"></i></div><div class="pv">${String(x.p).replace('.', ',')}%</div></div>`).join('') +
-    `</div><div class="lg"><span><i style="background:#2a78d6"></i>Từ 50% trở lên</span><span><i style="background:#eda100"></i>Dưới 50% – cần đôn đốc (${ds.filter(x => x.p < 50).length} dự án)</span></div></div>`;
+    `</div><div class="lg"><span><i style="background:#1d4e89"></i>Từ 50% trở lên</span><span><i style="background:#eda100"></i>Dưới 50% – cần đôn đốc (${ds.filter(x => x.p < 50).length} dự án)</span></div></div>`;
   // 3. Nhóm dự án: hàng 1 theo năm đang chọn, hàng 2 cả giai đoạn trung hạn
-  const IC = { dtc: '🏗', ctx: '🛠', pctt: '🌊' };
+  const IC = ICO;
   const N = dsNTM(), dtcDS = D.tienDo.nhom.dtc.duAn, ntmNam = dtcDS.filter(laNTM);
   const nam = [];
   NHOM.forEach(k => { const s = sumNhom(k);
@@ -359,7 +373,7 @@ function veTQ() {
 let LOCGN = '';
 function laNTM(x) { return /XNTM|NTM|nông thôn mới/i.test(x.nguonVon || ''); }
 // Trung hạn 2026-2030 chia theo nhóm nguồn vốn (tổng các nhóm = tổng dự án trung hạn)
-const MAU_TH = ['#2a78d6', '#d6542a', '#7c5cd6', '#eda100', '#13a3b5', '#c2408a', '#5b6b7f'];
+const MAU_TH = ['#1d4e89', '#b8893b', '#5b7fa6', '#8a6d3b', '#2f6f7a', '#9aa7b8', '#5b6b7f'];
 function veTH5() {
   if (!D.trungHan || !D.trungHan.nhom.length) return '';
   const G = D.trungHan.nhom.map((g, gi) => { const ntm = /XNTM|NTM|nông thôn mới/i.test(g.ten);
@@ -393,6 +407,18 @@ function veTH5() {
   return `<div class="hang"><span>Trung hạn 2026–2030: ${n} dự án</span>danh mục 5 năm, không đổi theo năm · KHV trung hạn ${tr(th)}${tm ? ' · TMĐT ' + tr(tm) : ''}</div>
     <div class="dwrap">${svg}${lg}</div>`;
 }
+// Biểu tượng nét mảnh (thay emoji)
+const SVGI = d => `<svg class="ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const ICO = {
+  dtc: SVGI('<path d="M3 21h18"/><path d="M5 21V10h6v11"/><path d="M11 21V6h5v15"/><path d="M16 4V2M13 4h8M19 4v3"/><path d="M7 13h2M7 16h2M13 9h1M13 12h1M13 15h1"/>'),
+  ctx: SVGI('<path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L3 17.8V21h3.2l6.3-6.3a4 4 0 0 0 5.2-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/>'),
+  pctt: SVGI('<path d="M7 15a4 4 0 1 1 1.2-7.8A5.5 5.5 0 0 1 18.5 9 3.5 3.5 0 0 1 18 16"/><path d="M2 20c1.5-1.2 3-1.2 4.5 0s3 1.2 4.5 0 3-1.2 4.5 0 3 1.2 4.5 0"/>'),
+  vi: SVGI('<path d="M3 7h15a3 3 0 0 1 3 3v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 7l12-4v4"/><circle cx="16.5" cy="14" r="1.2"/>'),
+  lich: SVGI('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M8 14h2M14 14h2M8 17h2"/>'),
+  xong: SVGI('<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 2h6v4H9z"/><path d="M9 13l2 2 4-4"/>'),
+  tim: SVGI('<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>'),
+  xuat: SVGI('<path d="M12 15V3M7.5 7.5 12 3l4.5 4.5"/><path d="M4 14v5a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/>')
+};
 let TH5_MO = false, TH5_ANIM = false;
 // Hình mờ cho 3 thẻ theo năm (vẽ bằng nét, đặt góc phải thẻ)
 const HINH_THE = {
@@ -421,7 +447,7 @@ function moNhom(k) { OPEN['g_' + k] = true; chuyen('da'); setTimeout(() => { con
 // ---------- DỰ ÁN ----------
 function veDA() {
   if (!D.tienDo) return '';
-  const t = D.tienDo.tong, IC = { dtc: '🏗', ctx: '🛠', pctt: '🌊' }, MT = { dtc: '#1f5fae', ctx: '#c27400', pctt: '#0e8a9a' };
+  const t = D.tienDo.tong, IC = ICO, MT = { dtc: '#0f2a4a', ctx: '#b8893b', pctt: '#2f6f7a' };
   let h = '';
   if (t) { const p = pctN(t.gn, t.khv);
     h += `<div class="dah"><div><div class="ct">Vốn đầu tư công năm ${D.nam}</div><div class="cs">triệu đồng</div></div>
@@ -672,7 +698,7 @@ function chonNTM(ten, tuDanhSach) {
 let THQ = '';
 const boDau = v => String(v || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd');
 function nhomTH() {
-  const T = D.trungHan, VIV = ['#3b82f6', '#6d5dfc', '#22d3ee', '#34d399', '#f59e0b', '#f472b6'], GRY = ['#64748b', '#7c8aa0', '#94a3b8', '#556070', '#a3adbd'];
+  const T = D.trungHan, VIV = ['#4f86c6', '#d9b25f', '#8fb3dd', '#c98f3a', '#6fa3a8', '#a8b7cc'], GRY = ['#4b5a70', '#5f6e84', '#7a879a', '#3f4c60', '#8d98a8'];
   let vi = 0, gy = 0;
   const G = T.nhom.map((g, gi) => ({ gi, ten: g.ten, n: g.duAn.length, th: g.duAn.reduce((a, x) => a + (x.th || 0), 0), tm: g.duAn.reduce((a, x) => a + (x.tmdtQD || x.tmdtCT || 0), 0) }))
     .sort((a, b) => b.th - a.th || b.n - a.n);
@@ -695,11 +721,11 @@ function veTH() {
   const vong = G.filter(g => g.th > 0).map(g => { const len = g.th / tongTH * C, o = `<circle cx="110" cy="110" r="${R}" fill="none" stroke="${g.mau}" stroke-width="26" stroke-dasharray="${Math.max(0.5, len - 2)} ${C}" stroke-dashoffset="${-st}" transform="rotate(-90 110 110)" class="sgt" onclick="moNhomTH(${g.gi})" onmousemove="tip(event,'<b>${esc(g.ten).replace(/'/g, '&#39;')}</b><br>KHV trung hạn ${f0(g.th)} (${f1(g.th / tongTH * 100)}%)<br>${g.n} dự án')" onmouseleave="tip(event)"/>`; st += len; return o; }).join('');
   let h = `<div class="thd">
     <div class="thd-h"><div><h2>Kế hoạch đầu tư công trung hạn 2026–2030</h2><div class="sub2">ĐVT: triệu đồng · ${esc(T.nhanTH || '')}</div></div>
-      <div class="thd-a"><label class="srch">🔍<input id="thq" placeholder="Tìm dự án…" value="${esc(THQ)}" oninput="THQ=this.value;capNhatDSTH()"></label><button class="xbc" onclick="xuatTH()">⇪ Xuất báo cáo</button></div></div>
+      <div class="thd-a"><label class="srch">${ICO.tim}<input id="thq" placeholder="Tìm dự án…" value="${esc(THQ)}" oninput="THQ=this.value;capNhatDSTH()"></label><button class="xbc" onclick="xuatTH()">${ICO.xuat} Xuất báo cáo</button></div></div>
     <div class="thd-k">
-      <div class="kc"><div class="kt">KHV trung hạn 2026–2030 <span>👛</span></div><div class="kv">${f0(tongTH)}</div><div class="kb">${cot}</div></div>
-      <div class="kc c2"><div class="kt">KHV năm ${D.nam} đã giao <span>📅</span></div><div class="kv">${n ? f0(n.khv) : '–'} ${n ? `<em>${f1(pK)}% tổng KHV</em>` : ''}</div><div class="kp"><i style="width:${Math.min(100, pK)}%"></i></div></div>
-      <div class="kc c3"><div class="kt">Đã giải ngân năm ${D.nam} <span>✅</span></div><div class="kv">${n ? f0(n.gn) : '–'} ${n ? `<em>${f1(pG)}%</em>` : ''}</div><div class="kd">${doan}</div></div>
+      <div class="kc"><div class="kt">KHV trung hạn 2026–2030 <span>${ICO.vi}</span></div><div class="kv">${f0(tongTH)}</div><div class="kb">${cot}</div></div>
+      <div class="kc c2"><div class="kt">KHV năm ${D.nam} đã giao <span>${ICO.lich}</span></div><div class="kv">${n ? f0(n.khv) : '–'} ${n ? `<em>${f1(pK)}% tổng KHV</em>` : ''}</div><div class="kp"><i style="width:${Math.min(100, pK)}%"></i></div></div>
+      <div class="kc c3"><div class="kt">Đã giải ngân năm ${D.nam} <span>${ICO.xong}</span></div><div class="kv">${n ? f0(n.gn) : '–'} ${n ? `<em>${f1(pG)}%</em>` : ''}</div><div class="kd">${doan}</div></div>
     </div>
     <div class="thd-b">
       <div class="kc"><div class="kt">Tỷ trọng nguồn vốn <small>theo KHV trung hạn</small></div>
