@@ -417,7 +417,7 @@ function veBanDo() {
     el.innerHTML = '';
     if (MAP) { MAP.remove(); MAP = null; }
     MAP = L.map(el, { zoomControl: true });
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 20, subdomains: 'abcd', attribution: '© OpenStreetMap © CARTO' }).addTo(MAP);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, attribution: 'Bản đồ nền © Esri' }).addTo(MAP);
     const N = dsNTM(), K = N.map(x => tuKhoa(x.ten));
     MAPIDX = {};
     LAYERS = KML.map(k => {
@@ -462,7 +462,7 @@ function chonNTM(ten, tuDanhSach) {
   const ds = MAPIDX && MAPIDX[ten];
   if (MAP && ds && ds.length) {
     const g = L.featureGroup(ds.map(o => o.g));
-    MAP.fitBounds(g.getBounds(), { maxZoom: 17, padding: [40, 40] });
+    MAP.fitBounds(g.getBounds(), { maxZoom: 16, padding: [60, 60] });
     ds[0].g.openPopup(g.getBounds().getCenter());
     if (tuDanhSach && innerWidth <= 1000) document.getElementById('ntmmap').scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
