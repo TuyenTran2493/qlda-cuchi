@@ -71,7 +71,13 @@ a{color:var(--pri)}
 .tile .m{font-size:12px;color:var(--mute);margin-top:2px}
 .sb{display:grid;grid-template-columns:110px 1fr;gap:10px;align-items:center;margin-top:10px}.sbl{font-size:12px;color:var(--mute)}
 .sbt{display:flex;height:26px;border-radius:7px;overflow:hidden;background:#eef1f5}.sbt i{display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-style:normal;font-weight:600;cursor:pointer;white-space:nowrap;overflow:hidden;border-right:2px solid #fff}.sbt i:last-child{border-right:0}
-.th5{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.dwrap{display:flex;gap:24px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.dn{flex:0 0 auto;max-width:100%}.dn .sg{cursor:pointer;transition:stroke-dasharray .6s ease-out}.dn .sg:hover{opacity:.85}
+.dn .pl{font-size:12px;font-weight:700;fill:#fff;pointer-events:none;opacity:0;transition:opacity .3s .7s}.dn.mo .pl{opacity:1}
+.dn .nut{cursor:pointer}.dn .nut circle{transition:r .35s ease,fill .35s}.dn .nut:hover circle{filter:brightness(1.05)}
+.dlg{flex:1 1 320px;display:grid;gap:8px}.dlg .di{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border:1px solid var(--line);border-radius:10px;cursor:pointer;opacity:0;transform:translateX(-12px);pointer-events:none;transition:opacity .3s,transform .3s}
+.dlg.mo .di{opacity:1;transform:none;pointer-events:auto}.dlg .di:hover{box-shadow:0 4px 14px rgba(16,24,40,.08)}
+.dlg .di>i{width:12px;height:12px;border-radius:50%;margin-top:4px;flex:0 0 auto}.dlg .di>div{flex:1}.dlg b{font-size:13px}.dlg .dn1{font-size:12px;font-weight:700;margin-left:4px}.dlg .m{font-size:12px;color:var(--mute);margin-top:2px}.dlg .go{color:var(--mute);font-size:18px}
 @media(max-width:600px){.sb{grid-template-columns:1fr;gap:3px}}
 .tile .ntm{margin-top:4px;font-size:12px;color:#1a7f4b;font-weight:600}
 .hang{margin-top:16px;font-size:12px;color:var(--mute);border-top:1px dashed var(--line);padding-top:10px}.hang span{font-weight:700;color:var(--ink);font-size:13px;margin-right:8px}
@@ -280,14 +286,32 @@ function veTH5() {
   const n = G.reduce((a, g) => a + g.n, 0), tm = G.reduce((a, g) => a + g.tm, 0), th = D.trungHan.tong ? D.trungHan.tong.th : G.reduce((a, g) => a + g.th, 0);
   // Thẻ NTM đứng thứ 3
   const iN = G.findIndex(g => g.ntm); if (iN >= 0) { const [g] = G.splice(iN, 1); G.splice(Math.min(2, G.length), 0, g); }
-  const ntm = G.find(g => g.ntm), ntmNam = D.tienDo ? D.tienDo.nhom.dtc.duAn.filter(laNTM).length : 0;
+  const ntmNam = D.tienDo ? D.tienDo.nhom.dtc.duAn.filter(laNTM).length : 0;
+  // Vòng tròn: thu gọn là một nút tròn; bấm vào thì xòe thành các nhóm (tỷ lệ theo số dự án)
+  const R = 92, SW = 40, C = 2 * Math.PI * R, CX = 130;
+  let st = 0;
+  const seg = G.map((g, i) => { const len = g.n / n * C, mid = (st + len / 2) / C * 2 * Math.PI - Math.PI / 2;
+    const o = { g, i, len, st, lx: CX + R * Math.cos(mid), ly: CX + R * Math.sin(mid), p: g.n / n * 100 }; st += len; return o; });
+  const ttip = g => `<b>${esc(g.ten).replace(/'/g, '&#39;')}</b><br>${g.n} dự án${g.tm ? '<br>TMĐT ' + tr(g.tm) : ''}${g.th ? '<br>KHV trung hạn ' + tr(g.th) : ''}<br><i>Bấm để xem chi tiết</i>`;
+  const svg = `<svg class="dn ${TH5_MO && !TH5_ANIM ? 'mo' : ''}" viewBox="0 0 260 260" width="260" height="260">
+    <circle cx="${CX}" cy="${CX}" r="${R}" fill="none" stroke="#eef1f5" stroke-width="${SW}"/>` +
+    seg.map(x => `<circle class="sg" data-l="${Math.max(0.5, x.len - 2)}" cx="${CX}" cy="${CX}" r="${R}" fill="none" stroke="${x.g.mau}" stroke-width="${SW}"
+      stroke-dasharray="${TH5_MO && !TH5_ANIM ? Math.max(0.5, x.len - 2) : 0} ${C}" stroke-dashoffset="${-x.st}" transform="rotate(-90 ${CX} ${CX})" style="transition-delay:${x.i * 0.12}s"
+      onmousemove="tip(event,'${ttip(x.g)}')" onmouseleave="tip(event)" onclick="tip(event);moTH(${x.g.gi})"/>`).join('') +
+    seg.filter(x => x.p >= 5).map(x => `<text class="pl" x="${x.lx}" y="${x.ly + 4}" text-anchor="middle">${Math.round(x.p)}%</text>`).join('') +
+    `<g class="nut" onclick="TH5_MO=!TH5_MO;TH5_ANIM=TH5_MO;ve()"><circle cx="${CX}" cy="${CX}" r="${TH5_MO ? R - SW / 2 - 4 : R + SW / 2}" fill="${TH5_MO ? '#fff' : 'var(--pri)'}"/>
+      <text x="${CX}" y="${CX - 4}" text-anchor="middle" font-size="${TH5_MO ? 30 : 40}" font-weight="700" fill="${TH5_MO ? '#1d2433' : '#fff'}">${n}</text>
+      <text x="${CX}" y="${CX + 18}" text-anchor="middle" font-size="12" fill="${TH5_MO ? '#667085' : '#dbe7ff'}">dự án trung hạn</text>
+      <text x="${CX}" y="${CX + 36}" text-anchor="middle" font-size="11" fill="${TH5_MO ? '#98a2b3' : '#fff'}">${TH5_MO ? 'bấm để thu lại' : 'bấm để xem nhóm ▸'}</text></g></svg>`;
+  const lg = !TH5_MO ? '' : `<div class="dlg ${TH5_ANIM ? '' : 'mo'}">` + G.map((g, i) => `<div class="di" style="transition-delay:${TH5_ANIM ? 0.2 + i * 0.08 : 0}s" onclick="moTH(${g.gi})">
+      <i style="background:${g.mau}"></i><div><b>${esc(g.ten)}</b> <span class="dn1" style="color:${g.mau}">${g.n} dự án · ${String(Math.round(g.n / n * 1000) / 10).replace('.', ',')}%</span>
+      <div class="m">${[g.tm ? 'TMĐT ' + tr(g.tm) : '', g.th ? 'KHV TH ' + tr(g.th) : ''].filter(Boolean).join(' · ') || 'Chưa có số TMĐT, KHV'}${g.ntm ? ` · <span style="color:#1a7f4b">${ntmNam ? ntmNam + ' dự án có vốn năm ' + D.nam : 'chưa giao vốn năm ' + D.nam}</span>` : ''}</div></div><span class="go">›</span></div>`).join('') + '</div>';
+  if (TH5_ANIM) setTimeout(() => { document.querySelectorAll('.dn .sg').forEach(c => c.setAttribute('stroke-dasharray', c.dataset.l + ' ' + C)); document.querySelectorAll('.dn,.dlg').forEach(e => e.classList.add('mo')); TH5_ANIM = false; }, 30);
   return `<div class="hang"><span>Trung hạn 2026–2030: ${n} dự án</span>danh mục 5 năm, không đổi theo năm · KHV trung hạn ${tr(th)}${tm ? ' · TMĐT ' + tr(tm) : ''}</div>
-    <div class="tiles th5">` + G.map(g => `<div class="tile" style="border-left:5px solid ${g.mau}" onclick="moTH(${g.gi},${g.ntm})">
-      <div class="v" style="color:${g.mau};margin-top:0">${g.n}</div><div class="l">${esc(g.ten)}</div>
-      <div class="m">${[g.tm ? 'TMĐT ' + tr(g.tm) : '', g.th ? 'KHV TH ' + tr(g.th) : ''].filter(Boolean).join(' · ') || '&nbsp;'}</div>
-      ${g.ntm ? `<div class="ntm">${ntmNam ? ntmNam + ' dự án có vốn năm ' + D.nam : 'Chưa giao vốn năm ' + D.nam}</div>` : ''}</div>`).join('') + '</div>';
+    <div class="dwrap">${svg}${lg}</div>`;
 }
-function moTH(gi, ntm) { if (ntm) return chuyen('ntm'); OPEN['th_' + gi] = true; chuyen('th'); setTimeout(() => { const e = document.getElementById('th_' + gi); if (e) e.scrollIntoView(); }, 50); }
+let TH5_MO = false, TH5_ANIM = false;
+function moTH(gi) { OPEN['th_' + gi] = true; chuyen('th'); setTimeout(() => { const e = document.getElementById('th_' + gi); if (e) e.scrollIntoView(); }, 50); }
 function chuyen(t) { document.querySelector(`#tabs button[data-t="${t}"]`).click(); }
 function moNhom(k) { OPEN['g_' + k] = true; chuyen('da'); setTimeout(() => { const e = document.getElementById('g_' + k); if (e) e.scrollIntoView(); }, 50); }
 
