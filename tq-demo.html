@@ -3,10 +3,10 @@
 :root{--bg:#f6f7f9;--card:#fff;--ink:#1d2433;--mute:#667085;--line:#e4e7ec;--pri:#1f5fa8;--pri2:#e8f0fb;--ok:#1a7f4b;--warn:#b45309;--bad:#b42318}
 *{box-sizing:border-box}
 body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.45}
-header{background:var(--pri);color:#fff;padding:14px max(12px,calc((100% - 1100px)/2 + 12px))}
+header{background:linear-gradient(120deg,#123f73,#1f5fa8 60%,#2a78d6);color:#fff;padding:18px max(12px,calc((100% - 1180px)/2 + 12px))}
 header h1{margin:0;font-size:17px;font-weight:600}
 header .sub{opacity:.85;font-size:13px;margin-top:2px}
-main{max-width:1100px;margin:0 auto;padding:12px}
+main{max-width:1180px;margin:0 auto;padding:12px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px}
 .muted{color:var(--mute);font-size:13px}
 label{display:block;font-weight:600;font-size:14px;margin:12px 0 4px}
@@ -16,9 +16,9 @@ textarea{min-height:70px}
 button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--pri);background:var(--pri);color:#fff;padding:10px 16px}
 button.ghost{background:#fff;color:var(--pri)}
 button:disabled{opacity:.5;cursor:default}
-.tabs{display:flex;gap:6px;overflow-x:auto;padding:8px max(12px,calc((100% - 1100px)/2 + 12px));background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:8px max(12px,calc((100% - 1180px)/2 + 12px));background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
 .tabs button{background:#fff;color:var(--ink);border:1px solid var(--line);white-space:nowrap;padding:8px 12px}
-.tabs button.on{background:var(--pri);color:#fff;border-color:var(--pri)}
+.tabs button{border-radius:20px!important}.tabs button.on{background:var(--pri);color:#fff;border-color:var(--pri)}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
 .kpi{background:var(--pri2);border-radius:8px;padding:10px}
 .kpi .n{font-size:20px;font-weight:700}
@@ -51,20 +51,38 @@ button:disabled{opacity:.5;cursor:default}
 .msg.ok{background:#dcfae6;color:#05603a}.msg.err{background:#fee4e2;color:#912018}
 .loading{padding:30px;text-align:center;color:var(--mute)}
 a{color:var(--pri)}
-.hero{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-top:10px}
-.hero .big{font-size:34px;font-weight:700;color:var(--ok);line-height:1}
-.hero .big small{font-size:14px;color:var(--mute);font-weight:400;display:block;margin-top:4px}
-.hero .barw{flex:1;min-width:220px}
-.hero .bar{margin-top:0;height:10px;border-radius:5px}
-.stats{display:flex;gap:22px;flex-wrap:wrap;margin-top:10px;font-size:14px;color:var(--mute)}
-.stats b{display:block;font-size:17px;color:var(--ink)}
-.list{width:100%;border-collapse:collapse;margin-top:6px}
-.list td{padding:11px 6px;border-top:1px solid var(--line);vertical-align:middle}
-.list tr{cursor:pointer}.list tr:hover td{background:#f5f8ff}
-.list .nm{font-weight:600}.list .nm div{font-weight:400;font-size:12px;color:var(--mute)}
-.list .n{text-align:right;white-space:nowrap;font-weight:600}
-.list .t{text-align:right;white-space:nowrap;color:var(--mute);font-size:13px}
-.list .go{color:var(--mute);width:16px;text-align:right}
+.dash{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+.dash>.card{margin:0}
+.c4{grid-column:span 4}.c5{grid-column:span 5}.c6{grid-column:span 6}.c7{grid-column:span 7}.c8{grid-column:span 8}.c12{grid-column:span 12}
+@media (max-width:860px){.dash>.card{grid-column:span 12}}
+.ct{font-weight:700;font-size:15px}.cs{font-size:12px;color:var(--mute);margin-top:2px}
+.gauge{display:flex;align-items:center;gap:18px;margin-top:12px;flex-wrap:wrap}
+.gauge svg{flex:none}
+.gstats{display:grid;gap:10px;flex:1;min-width:160px}
+.gstats div{border-left:3px solid var(--line);padding-left:10px}
+.gstats div.a{border-color:#2a78d6}.gstats div.b{border-color:#1a7f4b}
+.gstats b{display:block;font-size:20px}.gstats span{font-size:12px;color:var(--mute)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:12px}
+.tile{border:1px solid var(--line);border-radius:10px;padding:12px;cursor:pointer;background:#fff;transition:box-shadow .15s,transform .15s}
+.tile:hover{box-shadow:0 4px 14px rgba(16,24,40,.08);transform:translateY(-1px)}
+.tile .ic{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:var(--pri2);color:var(--pri);font-size:15px}
+.tile .v{font-size:24px;font-weight:700;margin-top:8px}
+.tile .l{font-size:13px;font-weight:600}
+.tile .m{font-size:12px;color:var(--mute);margin-top:2px}
+.hb{margin-top:10px}
+.hb .r{display:grid;grid-template-columns:minmax(0,1fr) 150px 46px;gap:8px;align-items:center;padding:5px 4px;border-radius:6px;cursor:default}
+.hb .r:hover{background:#f5f8ff}
+.hb .r .nm{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hb .tr{height:10px;background:#eef1f5;border-radius:4px;overflow:hidden}
+.hb .tr i{display:block;height:100%;background:#2a78d6;border-radius:0 4px 4px 0}
+.hb .tr i.w{background:#eda100}
+.hb .pv{font-size:13px;text-align:right;font-weight:600}
+.hb2 .r{grid-template-columns:70px minmax(0,1fr) 34px}
+.lg{display:flex;gap:14px;font-size:12px;color:var(--mute);margin-top:8px;flex-wrap:wrap}
+.lg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.tip{position:fixed;pointer-events:none;background:#1d2433;color:#fff;font-size:12px;padding:6px 9px;border-radius:6px;z-index:50;max-width:280px;display:none}
+.sv{display:flex;height:14px;border-radius:4px;overflow:hidden;margin-top:12px;gap:2px}
+.sv i{display:block;height:100%}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
 .chip{border:1px solid var(--line);background:#fff;color:var(--ink);padding:4px 10px;border-radius:14px;font-size:13px}
 .chip.on{background:var(--pri);color:#fff;border-color:var(--pri)}
@@ -153,30 +171,55 @@ function sumNhom(k) {
   const ds = D.tienDo.nhom[k].duAn;
   return { n: ds.length, tmdt: ds.reduce((a, x) => a + x.tmdt, 0), khv: ds.reduce((a, x) => a + x.khv, 0), gn: ds.reduce((a, x) => a + x.gn, 0) };
 }
+function vong(p) {
+  const r = 52, c = 2 * Math.PI * r, v = Math.max(0, Math.min(100, p));
+  return `<svg width="132" height="132" viewBox="0 0 132 132" role="img" aria-label="Tỷ lệ giải ngân ${v}%"><circle cx="66" cy="66" r="${r}" fill="none" stroke="#eef1f5" stroke-width="14"/>
+    <circle cx="66" cy="66" r="${r}" fill="none" stroke="#1a7f4b" stroke-width="14" stroke-linecap="round" stroke-dasharray="${c * v / 100} ${c}" transform="rotate(-90 66 66)"/>
+    <text x="66" y="64" text-anchor="middle" font-size="24" font-weight="700" fill="#1d2433">${String(v).replace('.', ',')}%</text><text x="66" y="84" text-anchor="middle" font-size="11" fill="#667085">đã giải ngân</text></svg>`;
+}
+function tip(e, t) { let d = document.getElementById('tip'); if (!d) { d = document.createElement('div'); d.id = 'tip'; d.className = 'tip'; document.body.appendChild(d); }
+  if (!t) { d.style.display = 'none'; return; } d.innerHTML = t; d.style.display = 'block'; d.style.left = Math.min(e.clientX + 12, innerWidth - 290) + 'px'; d.style.top = (e.clientY + 14) + 'px'; }
 function veTQ() {
   if (!D.tienDo) return '';
   const t = D.tienDo.tong || sumNhom('dtc');
   const nhanGN = (D.tienDo.nhanGN || '').replace(/^KHV\s+/i, '');
-  let h = `<div class="card"><b>Vốn đầu tư công năm ${D.nam}</b><div class="muted">${esc(nhanGN)} · triệu đồng</div>
-    <div class="hero"><div class="big">${pct(t.gn, t.khv)}%<small>tỷ lệ giải ngân</small></div>
-      <div class="barw"><div class="bar"><i style="width:${Math.min(100, pctN(t.gn, t.khv))}%"></i></div>
-      <div class="stats"><span><b>${f0(t.khv)}</b>KHV đã giao</span><span><b>${f0(t.gn)}</b>Đã giải ngân</span><span><b>${f0(t.khv - t.gn)}</b>Còn lại</span></div></div></div></div>`;
-  const rows = [];
-  NHOM.forEach(k => { const s = sumNhom(k); rows.push([`moNhom('${k}')`, D.tienDo.nhom[k].ten, s.khv ? 'Giải ngân ' + pct(s.gn, s.khv) + '%' : '', s.n, s.tmdt]); });
+  const p = pctN(t.gn, t.khv);
+  let h = '<div class="dash">';
+  // 1. Vốn
+  h += `<div class="card c5"><div class="ct">Vốn đầu tư công năm ${D.nam}</div><div class="cs">${esc(nhanGN)} · triệu đồng</div>
+    <div class="gauge">${vong(p)}<div class="gstats"><div class="a"><b>${f0(t.khv)}</b><span>KHV đã giao</span></div><div class="b"><b>${f0(t.gn)}</b><span>Đã giải ngân</span></div><div><b>${f0(t.khv - t.gn)}</b><span>Còn phải giải ngân</span></div></div></div></div>`;
+  // 2. Giải ngân từng dự án
+  const ds = D.tienDo.nhom.dtc.duAn.filter(x => x.khv > 0).map(x => ({ ten: x.ten, khv: x.khv, gn: x.gn, p: pctN(x.gn, x.khv) })).sort((a, b) => a.p - b.p);
+  h += `<div class="card c7"><div class="ct">Giải ngân từng dự án đầu tư công</div><div class="cs">Xếp từ thấp đến cao · rê chuột (hoặc chạm) vào dòng để xem số tiền</div>
+    <div class="hb" style="max-height:236px;overflow:auto">` + ds.map(x => `<div class="r" onmousemove="tip(event,'<b>${esc(x.ten).replace(/'/g, '&#39;')}</b><br>Giải ngân ${f0(x.gn)} / ${f0(x.khv)} triệu')" onmouseleave="tip(event)" onclick="tip(event,'<b>${esc(x.ten).replace(/'/g, '&#39;')}</b><br>Giải ngân ${f0(x.gn)} / ${f0(x.khv)} triệu')">
+      <div class="nm">${esc(x.ten)}</div><div class="tr"><i class="${x.p < 50 ? 'w' : ''}" style="width:${Math.min(100, x.p)}%"></i></div><div class="pv">${String(x.p).replace('.', ',')}%</div></div>`).join('') +
+    `</div><div class="lg"><span><i style="background:#2a78d6"></i>Từ 50% trở lên</span><span><i style="background:#eda100"></i>Dưới 50% – cần đôn đốc (${ds.filter(x => x.p < 50).length} dự án)</span></div></div>`;
+  // 3. Nhóm dự án
+  const tiles = [];
+  const IC = { dtc: '🏗', ctx: '🛠', pctt: '🌊' };
+  NHOM.forEach(k => { const s = sumNhom(k); tiles.push([`moNhom('${k}')`, IC[k], s.n, D.tienDo.nhom[k].ten, s.tmdt ? 'TMĐT ' + tr(s.tmdt) : '']); });
   const N = dsNTM();
+  if (N.length) tiles.push([`chuyen('ntm')`, '🌾', N.length, 'Nông thôn mới', 'TMĐT ' + tr(N.reduce((a, x) => a + tmNTM(x), 0))]);
+  if (D.trungHan && D.trungHan.tong) tiles.push([`chuyen('th')`, '📋', D.trungHan.nhom.reduce((a, g) => a + g.duAn.length, 0), 'Trung hạn 2026–2030', 'KHV ' + tr(D.trungHan.tong.th)]);
+  h += `<div class="card c12"><div class="ct">Các nhóm dự án</div><div class="cs">Bấm vào ô để xem danh sách</div><div class="tiles">` +
+    tiles.map(x => `<div class="tile" onclick="${x[0]}"><div class="ic">${x[1]}</div><div class="v">${x[2]}</div><div class="l">${esc(x[3])}</div><div class="m">${x[4]}</div></div>`).join('') + '</div></div>';
+  // 4. Phân công NTM
   if (N.length) {
-    const thieu = N.filter(x => !x.kyThuat || !x.keToan).length;
-    rows.push([`chuyen('ntm')`, 'Nông thôn mới 2026–2030', thieu ? `<span class="thieu">${thieu} dự án chưa ghi đủ người phụ trách</span>` : 'Lọc theo kỹ thuật, kế toán', N.length, N.reduce((a, x) => a + tmNTM(x), 0)]);
+    const bar = (k) => { const L = demTheo(N, k), mx = Math.max(...L.map(a => a[1]));
+      return `<div class="hb hb2">` + L.map(([v, n]) => `<div class="r" style="cursor:pointer" onclick="FN={kt:'',kto:'',dv:'',q:''};FN['${k === 'kyThuat' ? 'kt' : 'kto'}']='${esc(v).replace(/'/g, "\\'")}';chuyen('ntm')"><div class="nm"${v === '(chưa ghi)' ? ' style="color:var(--warn)"' : ''}>${esc(v)}</div><div class="tr"><i class="${v === '(chưa ghi)' ? 'w' : ''}" style="width:${n / mx * 100}%"></i></div><div class="pv">${n}</div></div>`).join('') + '</div>'; };
+    h += `<div class="card c6"><div class="ct">Dự án NTM theo cán bộ kỹ thuật</div><div class="cs">Số dự án mỗi người phụ trách · bấm tên để xem danh sách</div>${bar('kyThuat')}</div>
+      <div class="card c6"><div class="ct">Dự án NTM theo kế toán</div><div class="cs">Số dự án mỗi người phụ trách · bấm tên để xem danh sách</div>${bar('keToan')}</div>`;
   }
-  if (D.trungHan && D.trungHan.tong) rows.push([`chuyen('th')`, 'Danh mục trung hạn 2026–2030', 'KHV trung hạn ' + tr(D.trungHan.tong.th), D.trungHan.nhom.reduce((a, g) => a + g.duAn.length, 0), 0]);
-  h += `<div class="card"><b>Các nhóm dự án</b><div class="muted">Bấm vào dòng để xem danh sách</div><table class="list">` +
-    rows.map(r => `<tr onclick="${r[0]}"><td class="nm">${esc(r[1])}<div>${r[2]}</div></td><td class="n">${r[3]} dự án</td><td class="t hide-sm">${r[4] ? 'TMĐT ' + tr(r[4]) : ''}</td><td class="go">›</td></tr>`).join('') + '</table></div>';
+  // 5. Đấu thầu
   if (D.dauThau) {
-    const x = D.dauThau;
-    h += `<div class="card"><b>Lựa chọn nhà thầu năm ${D.nam}</b><div class="stats"><span><b>${x.soGoi}</b>Gói thầu</span><span><b>${ty(x.tongGia)}</b>Giá gói thầu</span><span><b>${ty(x.tongTrung)}</b>Giá trúng thầu</span><span><b style="color:var(--ok)">${ty(x.tietKiem)}</b>Tiết kiệm${x.soTK ? ' (' + x.soTK + ' gói có kết quả)' : ''}</span></div>
+    const x = D.dauThau, tk = x.tongGia ? x.tietKiem / x.tongGia * 100 : 0;
+    h += `<div class="card c12"><div class="ct">Lựa chọn nhà thầu năm ${D.nam}</div><div class="cs">${x.soGoi} gói thầu${x.soTK ? ' · tiết kiệm tính trên ' + x.soTK + ' gói đã có kết quả' : ''}</div>
+      <div class="gauge" style="gap:28px"><div class="gstats" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr))">
+        <div class="a"><b>${x.soGoi}</b><span>Gói thầu</span></div><div><b>${ty(x.tongGia)}</b><span>Giá gói thầu</span></div>
+        <div class="a"><b>${ty(x.tongTrung)}</b><span>Giá trúng thầu</span></div><div class="b"><b style="color:var(--ok)">${ty(x.tietKiem)}</b><span>Tiết kiệm (${tk.toLocaleString('vi-VN', { maximumFractionDigits: 1 })}% giá gói)</span></div></div></div>
       ${x.chuaGan ? `<div class="muted" style="margin-top:8px;color:var(--warn)">${x.chuaGan} gói thầu chưa gắn được vào dự án.</div>` : ''}</div>`;
   }
-  return h;
+  return h + '</div>';
 }
 function chuyen(t) { document.querySelector(`#tabs button[data-t="${t}"]`).click(); }
 function moNhom(k) { OPEN['g_' + k] = true; chuyen('da'); setTimeout(() => { const e = document.getElementById('g_' + k); if (e) e.scrollIntoView(); }, 50); }
