@@ -241,6 +241,8 @@ a{color:var(--navy2)}
 .gda.tn-ctx{border-left-color:#b8893b!important}.gda.tn-pctt{border-left-color:#2f6f7a!important}
 .kb i{opacity:1}.kp i{background:linear-gradient(90deg,#4f86c6,#8fb3dd)!important}.thd .c2 .kv{color:#8fb3dd!important}
 .thd-h>div:first-child{flex:1 1 380px;min-width:0}.thd-a{flex:0 0 auto;flex-wrap:nowrap}.srch{margin:0!important;font-weight:400}.srch input{width:160px}
+.dah{grid-template-columns:auto 1fr minmax(360px,auto)!important}@media(max-width:900px){.dah{grid-template-columns:1fr!important}}
+.dap .xda{margin-left:10px;white-space:nowrap;padding:7px 12px;font-size:13px}
 </style>
 <script>
 // Cầu nối: trang này nằm ngoài Google nên gọi chương trình Apps Script qua mạng, không gửi tài khoản Google
@@ -453,7 +455,7 @@ function veDA() {
   if (t) { const p = pctN(t.gn, t.khv);
     h += `<div class="dah"><div><div class="ct">Vốn đầu tư công năm ${D.nam}</div><div class="cs">triệu đồng</div></div>
       <div class="dak"><div><b>${f0(t.khv)}</b><span>KHV đã giao</span></div><div><b style="color:var(--ok)">${f0(t.gn)}</b><span>Đã giải ngân</span></div><div><b style="color:var(--warn)">${f0(t.khv - t.gn)}</b><span>Còn phải giải ngân</span></div></div>
-      <div class="dap"><div class="pb"><i style="width:${Math.min(100, p)}%"></i></div><b>${String(p).replace('.', ',')}%</b></div></div>`; }
+      <div class="dap"><div class="pb"><i style="width:${Math.min(100, p)}%"></i></div><b>${String(p).replace('.', ',')}%</b><button class="xbc xda" onclick="xuatDA(this)">${ICO.xuat} Xuất báo cáo</button></div></div>`; }
   NHOM.forEach(k => {
     const g = D.tienDo.nhom[k], s = sumNhom(k), id = 'g_' + k;
     if (!g.duAn.length) return;
@@ -765,6 +767,60 @@ function moNhomTH(gi) { OPEN['th_' + gi] = true; capNhatDSTH(); const e = docume
 function napExcelJS() {
   return window.ExcelJS ? Promise.resolve() : new Promise((ok, loi) => { const sc = document.createElement('script');
     sc.src = 'https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js'; sc.onload = ok; sc.onerror = () => loi(new Error('Không tải được thư viện Excel')); document.head.appendChild(sc); });
+}
+async function xuatDA(nut) {
+  const cu = nut.innerHTML; nut.disabled = true; nut.innerHTML = 'Đang tạo file…';
+  try {
+    await napExcelJS();
+    const wb = new ExcelJS.Workbook(), font = { name: 'Times New Roman', size: 12 };
+    const vien = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+    const dauTrang = (ws, n, tieuDe, dong3) => {
+      [['BAN QUẢN LÝ DỰ ÁN ĐẦU TƯ XÂY DỰNG XÃ CỦ CHI', { ...font, bold: true }, 'left'], [tieuDe, { ...font, size: 14, bold: true }, 'center'], [dong3, { ...font, italic: true, size: 11 }, 'center']]
+        .forEach(([v, f, al], i) => { ws.mergeCells(i + 1, 1, i + 1, n); const c = ws.getCell(i + 1, 1); c.value = v; c.font = f; c.alignment = { horizontal: al, wrapText: true }; });
+    };
+    const tieuDeCot = (ws, r, ten) => { const row = ws.getRow(r); row.values = ten; row.height = 36;
+      row.eachCell(c => { c.font = { ...font, bold: true, color: { argb: 'FFF3E6C8' } }; c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F2A4A' } }; c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }; c.border = vien; }); };
+    const dongNhom = (row, mau, chu) => row.eachCell({ includeEmpty: true }, c => { c.font = { ...font, bold: true, color: { argb: chu || 'FF000000' } }; c.border = vien; c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: mau } }; c.alignment = { vertical: 'middle', wrapText: true }; });
+    const dongDA = row => row.eachCell({ includeEmpty: true }, c => { c.font = font; c.border = vien; c.alignment = { vertical: 'top', wrapText: true }; });
+    const ghi = `ĐVT: triệu đồng; số liệu lúc ${D.capNhat}`;
+    // Trang 1: danh sách dự án
+    const c1 = [['STT', 6], ['Tên dự án', 42], ['Phân nhóm', 14], ['Mã dự án', 11], ['Nguồn vốn', 14], ['TMĐT', 13], ['KHV năm ' + D.nam, 13], ['Đã giải ngân', 13], ['Tỷ lệ GN', 9], ['Tiến độ hiện tại', 42], ['Dự kiến hoàn thành', 14], ['Khó khăn, vướng mắc', 30], ['Đề xuất', 26], ['Đơn vị thực hiện', 20]];
+    const w1 = wb.addWorksheet('Dự án năm ' + D.nam, { views: [{ state: 'frozen', ySplit: 5, xSplit: 2 }], pageSetup: { orientation: 'landscape', paperSize: 9, fitToPage: true, fitToWidth: 1, fitToHeight: 0 } });
+    w1.columns = c1.map(c => ({ width: c[1] }));
+    dauTrang(w1, c1.length, 'BÁO CÁO TÌNH HÌNH THỰC HIỆN DỰ ÁN NĂM ' + D.nam, ghi); w1.getRow(3).height = 20;
+    tieuDeCot(w1, 5, c1.map(c => c[0]));
+    let r = 6; const t = D.tienDo.tong || sumNhom('dtc');
+    const tong = w1.getRow(r++); tong.values = ['', 'TỔNG CỘNG', '', '', '', null, t.khv, t.gn, t.khv ? t.gn / t.khv : null]; dongNhom(tong, 'FFFDECEC', 'FFB42318');
+    const so = [];
+    NHOM.forEach((k, ki) => {
+      const g = D.tienDo.nhom[k], s2 = sumNhom(k); if (!g.duAn.length) return;
+      const rg = w1.getRow(r++); rg.values = ['I II III'.split(' ')[ki], g.ten.toUpperCase() + ' (' + s2.n + ' dự án)', '', '', '', s2.tmdt || null, s2.khv || null, s2.khv ? s2.gn : null, s2.khv ? s2.gn / s2.khv : null]; dongNhom(rg, 'FFF7F1E4');
+      const pn = x => (x.phanNhom || 'Khác').replace(/\s+/g, ' ').trim();
+      g.duAn.slice().sort((a, b) => pn(a).localeCompare(pn(b), 'vi')).forEach((x, i) => {
+        const rr = w1.getRow(r++);
+        rr.values = [i + 1, x.ten, pn(x), x.ma || '', x.nguonVon || '', x.tmdt || null, x.khv || null, x.khv ? (x.gn || 0) : null, x.khv ? (x.gn || 0) / x.khv : null, x.tienDo || '', x.duKienHT || '', x.khoKhan || '', x.deXuat || '', x.donVi || ''];
+        dongDA(rr); rr.getCell(1).alignment = { horizontal: 'center', vertical: 'top' };
+        if (x.khv && (x.gn || 0) / x.khv < 0.5) rr.getCell(9).font = { ...font, bold: true, color: { argb: 'FFB45309' } };
+      });
+    });
+    for (let i = 6; i < r; i++) { [6, 7, 8].forEach(j => w1.getCell(i, j).numFmt = '#,##0'); w1.getCell(i, 9).numFmt = '0.0%'; }
+    // Trang 2: gói thầu
+    const c2 = [['STT', 6], ['Dự án', 36], ['Gói thầu', 42], ['Mã TBMT', 16], ['Hình thức LCNT', 18], ['Ngày', 12], ['Giá gói thầu (đồng)', 17], ['Giá trúng thầu (đồng)', 17], ['Nhà thầu', 32]];
+    const w2 = wb.addWorksheet('Gói thầu', { views: [{ state: 'frozen', ySplit: 5 }], pageSetup: { orientation: 'landscape', paperSize: 9, fitToPage: true, fitToWidth: 1, fitToHeight: 0 } });
+    w2.columns = c2.map(c => ({ width: c[1] }));
+    dauTrang(w2, c2.length, 'DANH SÁCH GÓI THẦU CÁC DỰ ÁN NĂM ' + D.nam, 'ĐVT: đồng; số liệu lúc ' + D.capNhat);
+    tieuDeCot(w2, 5, c2.map(c => c[0]));
+    let r2 = 6, n2 = 0;
+    NHOM.forEach(k => D.tienDo.nhom[k].duAn.forEach(x => { if (!x.goi || !x.goi.length) return;
+      const rh = w2.getRow(r2++); rh.values = ['', x.ten + ' (' + x.goi.length + ' gói)', '', '', '', '', x.goi.reduce((a, g) => a + (g.gia || 0), 0), x.goi.reduce((a, g) => a + (g.trung || 0), 0) || null]; dongNhom(rh, 'FFF7F1E4');
+      x.goi.forEach(g => { const rr = w2.getRow(r2++); rr.values = [++n2, '', g.ten || '', g.ma || '', g.hinhThuc || '', g.ngay || '', g.gia || null, g.trung || null, g.nhaThau || '']; dongDA(rr); rr.getCell(1).alignment = { horizontal: 'center', vertical: 'top' }; });
+    }));
+    for (let i = 6; i < r2; i++) [7, 8].forEach(j => w2.getCell(i, j).numFmt = '#,##0');
+    const buf = await wb.xlsx.writeBuffer(), a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+    a.download = 'Bao cao du an nam ' + D.nam + ' xa Cu Chi.xlsx'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+  } catch (e) { alert(e.message); }
+  nut.disabled = false; nut.innerHTML = cu;
 }
 async function xuatTH() {
   const nut = document.querySelector('.xbc'), cu = nut ? nut.innerHTML : '';
