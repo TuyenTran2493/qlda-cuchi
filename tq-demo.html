@@ -259,6 +259,19 @@ a{color:var(--navy2)}
 .nv{background:#fff!important;border:1px solid #e4e7ec!important}.nv:hover{border-color:var(--gold)!important;background:#fbf8f1!important}
 .nv b{color:var(--ink)!important}.nv .vl{color:var(--pri)!important}.nv .cpb{color:var(--mute)!important}.nv .cv{color:var(--gold)!important}
 .nv .pill{background:#f7f1e4!important;border-color:rgba(184,137,59,.35)!important;color:#7a5a22!important}
+
+/* Tab Văn bản pháp luật */
+.vbc{display:inline-block;margin-left:10px;font-size:13px;font-weight:700;padding:3px 12px;border-radius:14px;background:var(--gold);color:#0f2a4a;vertical-align:4px}
+.vbg{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;padding:18px 18px 0}
+.vbt{display:grid;grid-template-columns:64px 1fr;grid-template-rows:1fr auto;column-gap:14px;padding:14px;border:1px solid var(--goldl);border-radius:12px;background:linear-gradient(135deg,#fff 55%,#faf6ec);cursor:pointer;transition:box-shadow .2s,transform .2s,border-color .2s}
+.vbt:hover{box-shadow:0 8px 20px rgba(184,137,59,.2);transform:translateY(-2px);border-color:var(--gold)}
+.vbi{grid-row:1/3;width:64px;height:64px;border-radius:12px;background:linear-gradient(135deg,#0f2a4a,#163a63);display:grid;place-items:center;color:var(--gold2);box-shadow:0 0 0 2px rgba(217,178,95,.35) inset}
+.vbi .ico{width:34px;height:34px;stroke-width:1.5}
+.vbn b{display:block;font-size:16px;color:var(--pri);line-height:1.3}.vbn span{font-size:13px;color:var(--mute)}
+.vbx{justify-self:end;align-self:end;font-size:13px;font-weight:600;color:var(--gold)}
+.vbt.on{background:linear-gradient(135deg,#0f2a4a,#163a63);border-color:var(--gold)}.vbt.on .vbn b{color:#fff}.vbt.on .vbn span{color:#e8d6ae}.vbt.on .vbx{color:var(--gold2)}.vbt.on .vbi{background:#fff;color:var(--gold)}
+.vbl{border-top:3px solid var(--gold)!important}.vblh{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.vblh b{color:var(--pri);font-size:16px}.vblh button{padding:5px 12px}
+.vbd .thd-h h2{display:flex;align-items:center;flex-wrap:wrap}
 </style>
 <script>
 // Cầu nối: trang này nằm ngoài Google nên gọi chương trình Apps Script qua mạng, không gửi tài khoản Google
@@ -874,25 +887,50 @@ async function xuatTH() {
 }
 
 // ---------- VĂN BẢN PHÁP LUẬT ----------
+let VBSEL = '', VBQ = '';
+const ICO_VB = {
+  'đầu tư công': '<path d="M3 20h18"/><path d="M5 16l4-4 3 3 6-7"/><path d="M14 8h4v4"/>',
+  'thanh toán': '<rect x="9" y="3" width="11" height="15" rx="2"/><path d="M12 7h5M12 10h5M12 13h3"/><ellipse cx="7" cy="16" rx="4" ry="1.6"/><path d="M3 16v3c0 .9 1.8 1.6 4 1.6s4-.7 4-1.6v-3"/>',
+  'quyết toán dự án': '<path d="M4 21V8h7v13M11 21V4h6v8"/><path d="M6 11h3M6 14h3M13 7h2M13 10h2"/><circle cx="17" cy="16" r="3"/><path d="M15.5 18.5 15 22l2-1 2 1-.5-3.5"/>',
+  'ngân sách': '<path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8"/><path d="M3 21h18"/>',
+  'đấu thầu': '<path d="M14 4l6 6M12 6l6 6M13 5l-5 5 6 6 5-5"/><path d="M10.5 12.5 3 20"/><path d="M3 21h9"/>',
+  'chi phí': '<circle cx="9" cy="10" r="3"/><path d="M9 3v2M9 15v2M2 10h2M14 10h2M4 5l1.5 1.5M12.5 13.5 14 15M4 15l1.5-1.5M12.5 6.5 14 5"/><circle cx="17" cy="17" r="4"/><path d="M17 15v4M15.8 16h2"/>',
+  'chất lượng': '<path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/>',
+  'hợp đồng': '<path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M9 11h7M9 14h7M9 17h4"/><path d="M14 19c1-1 2-1 3 0"/>',
+  'chi thường xuyên': '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M9 15a3 3 0 1 0 3-3"/><path d="M12 10.5 12 12l1.5.3"/>',
+  'năng lực': '<circle cx="12" cy="8" r="4"/><path d="M8 11.5 6.5 21 12 18l5.5 3L16 11.5"/>',
+  'xây dựng': '<path d="M4 21V3h2v18M6 5h14M17 5v5"/><path d="M6 3l3 2M15.5 10h3v2.5h-3z"/><path d="M10 21v-5h6v5"/>'
+};
+function icoVB(k) { const t = boDau(k); const key = Object.keys(ICO_VB).find(x => t.includes(boDau(x))) || 'hợp đồng'; return SVGI(ICO_VB[key]); }
 function veVB() {
   const V = D.vanBan || [];
   const map = {}, order = [];
   V.forEach(x => { const k = (x.linhVuc || 'Khác').split(';')[0].trim(); if (!map[k]) { map[k] = []; order.push(k); } map[k].push(x); });
-  let h = `<div class="card"><b>Văn bản pháp luật về quản lý dự án vốn ngân sách</b><div class="muted">${V.length} văn bản · bấm “Chi tiết” để xem trách nhiệm của chủ đầu tư · bấm số hiệu để mở trên Thư viện pháp luật</div></div>`;
-  let stt = 0;
-  order.forEach((k, gi) => {
-    let body = `<div class="wrap"><table class="tbl"><tr><th>STT</th><th>Số hiệu</th><th>Tên văn bản</th><th class="hide-sm">Hiệu lực</th><th></th></tr>`;
-    map[k].forEach((x, i) => {
-      stt++;
-      const id = 'vb_' + gi + '_' + i;
-      const link = 'https://thuvienphapluat.vn/page/tim-van-ban.aspx?keyword=' + encodeURIComponent(x.soHieu) + '&match=True';
-      body += `<tr><td>${stt}</td><td style="white-space:nowrap"><a href="${link}" target="_blank">${esc(x.soHieu)}</a></td><td>${esc(x.ten)}<div class="muted">${esc(x.coQuan)} · ${esc(x.ngayBH)} · <span class="pill">${esc(x.tinhTrang)}</span></div></td><td class="hide-sm">${esc(x.hieuLuc)}</td><td><button class="ghost" style="padding:4px 10px" onclick="ROW['${id}']=!ROW['${id}'];ve()">${ROW[id] ? 'Thu gọn' : 'Chi tiết'}</button></td></tr>`;
-      if (ROW[id]) body += `<tr><td colspan="5"><dl class="detail">${[['Trách nhiệm, nghĩa vụ của chủ đầu tư', x.trachNhiem], ['Làm căn cứ cho', x.canCu], ['Thay thế / sửa đổi', x.thayThe], ['Lĩnh vực', x.linhVuc], ['Ngày rà soát', x.ngayRS]].filter(a => a[1]).map(a => `<dt>${a[0]}</dt><dd>${esc(a[1])}</dd>`).join('')}</dl></td></tr>`;
-    });
-    h += grp('vb_' + gi, esc(k), map[k].length + ' văn bản', body + '</table></div>');
-  });
-  return h;
+  const tiles = order.map(k => `<div class="vbt ${VBSEL === k ? 'on' : ''}" onclick="chonVB('${esc(k).replace(/'/g, "\\'")}')"><div class="vbi">${icoVB(k)}</div>
+      <div class="vbn"><b>${esc(k)}</b><span>${map[k].length} văn bản</span></div><div class="vbx">${VBSEL === k ? 'Đang xem' : 'Xem danh sách'} →</div></div>`).join('');
+  return `<div class="thd vbd"><div class="thd-h"><div><h2>Hệ thống văn bản pháp lý <span class="vbc">${V.length} văn bản</span></h2>
+      <div class="sub2">Chọn lĩnh vực để xem danh sách; bấm "Chi tiết" để xem trách nhiệm của chủ đầu tư; bấm số hiệu để mở trên Thư viện pháp luật</div></div>
+      <div class="thd-a"><label class="srch">${ICO.tim}<input placeholder="Tìm số hiệu, tên văn bản…" value="${esc(VBQ)}" oninput="VBQ=this.value;capNhatVB()"></label></div></div>
+    <div class="vbg">${tiles}</div></div><div id="dsVB">${dsVB(map, order)}</div>`;
 }
+function dsVB(map, order) {
+  if (!map) { map = {}; order = []; (D.vanBan || []).forEach(x => { const k = (x.linhVuc || 'Khác').split(';')[0].trim(); if (!map[k]) { map[k] = []; order.push(k); } map[k].push(x); }); }
+  const q = boDau(VBQ.trim());
+  let ds, tieuDe;
+  if (q) { ds = (D.vanBan || []).filter(x => boDau(x.soHieu + ' ' + x.ten + ' ' + (x.coQuan || '')).includes(q)); tieuDe = `Kết quả tìm "${esc(VBQ)}": ${ds.length} văn bản`; }
+  else if (VBSEL && map[VBSEL]) { ds = map[VBSEL]; tieuDe = `${esc(VBSEL)}: ${ds.length} văn bản`; }
+  else return '';
+  let body = `<div class="card vbl"><div class="vblh"><b>${tieuDe}</b><button class="ghost" onclick="VBSEL='';VBQ='';ve()">Đóng ✕</button></div><div class="wrap"><table class="tbl"><tr><th>STT</th><th>Số hiệu</th><th>Tên văn bản</th><th class="hide-sm">Hiệu lực</th><th></th></tr>`;
+  ds.forEach((x, i) => {
+    const id = 'vb_' + boDau(x.soHieu).replace(/[^a-z0-9]/g, '');
+    const link = 'https://thuvienphapluat.vn/page/tim-van-ban.aspx?keyword=' + encodeURIComponent(x.soHieu) + '&match=True';
+    body += `<tr><td>${i + 1}</td><td style="white-space:nowrap"><a href="${link}" target="_blank">${esc(x.soHieu)}</a></td><td>${esc(x.ten)}<div class="muted">${esc(x.coQuan)} · ${esc(x.ngayBH)} · <span class="pill">${esc(x.tinhTrang)}</span></div></td><td class="hide-sm">${esc(x.hieuLuc)}</td><td><button class="ghost" style="padding:4px 10px" onclick="ROW['${id}']=!ROW['${id}'];capNhatVB()">${ROW[id] ? 'Thu gọn' : 'Chi tiết'}</button></td></tr>`;
+    if (ROW[id]) body += `<tr><td colspan="5"><dl class="detail">${[['Trách nhiệm, nghĩa vụ của chủ đầu tư', x.trachNhiem], ['Làm căn cứ cho', x.canCu], ['Thay thế / sửa đổi', x.thayThe], ['Lĩnh vực', x.linhVuc], ['Ngày rà soát', x.ngayRS]].filter(a => a[1]).map(a => `<dt>${a[0]}</dt><dd>${esc(a[1])}</dd>`).join('')}</dl></td></tr>`;
+  });
+  return body + '</table></div></div>';
+}
+function capNhatVB() { const e = document.getElementById('dsVB'); if (e) e.innerHTML = dsVB(); }
+function chonVB(k) { VBSEL = VBSEL === k ? '' : k; VBQ = ''; ve(); setTimeout(() => { const e = document.getElementById('dsVB'); if (e && VBSEL) e.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 30); }
 tai(false);
 </script>
 </body></html>
