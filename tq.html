@@ -262,7 +262,7 @@ function chiTietDA(x) {
 
 // ---------- DỰ ÁN NTM ----------
 // Lấy từ tab "Trung hạn 26-30": các dự án có nguồn vốn thuộc Chương trình xây dựng nông thôn mới (CTTH XNTM).
-let FN = { kt: '', kto: '', dv: '', q: '' };
+let FN = { kt: '', kto: '', dv: '', q: '', loai: '' };
 function nhomNTM() { return D && D.trungHan ? D.trungHan.nhom.filter(g => /XNTM|NTM|nông thôn mới/i.test(g.ten)) : []; }
 function dsNTM() { return nhomNTM().reduce((a, g) => a.concat(g.duAn), []); }
 function tmNTM(x) { return x.tmdtQD || x.tmdtCT || 0; }
@@ -280,11 +280,36 @@ function locNTM(ds) {
   return ds.filter(x => (!FN.loai || loaiNTM(x) === FN.loai) && khop(x.kyThuat, FN.kt) && khop(x.keToan, FN.kto) && khop(x.donVi, FN.dv) &&
     (!q || (x.ten + ' ' + (x.quyMo || '')).toLowerCase().includes(q)));
 }
-function setFN(k, v) { FN[k] = FN[k] === v ? '' : v; ve(); }
+function setFN(k, v) { FN[k] = FN[k] === v ? '' : v; if (TAB === 'ntm' && document.getElementById('ntmloai')) capNhatNTM(); else ve(); }
+function boLocNTM() { FN = { kt: '', kto: '', dv: '', q: '', loai: '' }; capNhatNTM(); }
 function barNTM(N, k, fk) {
   const L = demTheo(N, k), mx = Math.max(...L.map(a => a[1]));
   return `<div class="hb hb2">` + L.map(([v, n]) => { const on = FN[fk] === v, cx = v === '(chưa ghi)';
     return `<div class="r" style="cursor:pointer${on ? ';background:#e8f0fb' : ''}" onclick="setFN('${fk}','${esc(v).replace(/'/g, "\\'")}')"><div class="nm"${cx ? ' style="color:var(--warn)"' : on ? ' style="font-weight:700"' : ''}>${esc(v)}</div><div class="tr"><i class="${cx ? 'w' : ''}" style="width:${n / mx * 100}%"></i></div><div class="pv">${n}</div></div>`; }).join('') + '</div>';
+}
+// Vẽ lại riêng các phần có bộ lọc, để khung bản đồ không phải tải lại mỗi lần bấm lọc.
+function capNhatNTM() {
+  const N = dsNTM();
+  const fk = k => k === 'kyThuat' ? 'kt' : k === 'keToan' ? 'kto' : 'dv';
+  const opt = (k, ten) => `<div><label>${ten}</label><select onchange="FN['${fk(k)}']=this.value;capNhatNTM()"><option value="">Tất cả</option>` +
+    demTheo(N, k).map(([v, n]) => `<option value="${esc(v)}" ${FN[fk(k)] === v ? 'selected' : ''}>${esc(v)} (${n})</option>`).join('') + '</select></div>';
+  document.getElementById('ntmloai').innerHTML = LOAI.map(([k, ten]) => { const ds = N.filter(x => loaiNTM(x) === k), on = FN.loai === k;
+    return `<div class="tile" style="${on ? 'border-color:var(--pri);background:#e8f0fb' : ''}" onclick="setFN('loai','${k}')"><div class="l">${k}</div><div class="v">${ds.length} <span style="font-size:14px;font-weight:400;color:var(--mute)">dự án</span></div><div class="m">${ten} · TMĐT ${tr(ds.reduce((a, x) => a + tmNTM(x), 0))}</div></div>`; }).join('');
+  document.getElementById('ntmbkt').innerHTML = barNTM(N, 'kyThuat', 'kt');
+  document.getElementById('ntmbkto').innerHTML = barNTM(N, 'keToan', 'kto');
+  const coLoc = FN.kt || FN.kto || FN.dv || FN.q || FN.loai;
+  const q = document.getElementById('ntmq');
+  if (!q) document.getElementById('ntmfl').innerHTML = `<div class="fl"><span id="ntmsel" style="display:contents"></span>
+      <div><label>Tìm tên dự án</label><input id="ntmq" placeholder="VD: đường số 23" oninput="FN.q=this.value;veDSNTM();capNhatBoLoc()"></div></div>
+    <div class="row" style="margin-top:8px"><span class="muted" id="ntmdem"></span><span class="right" id="ntmbo"></span></div>`;
+  document.getElementById('ntmq').value = FN.q;
+  document.getElementById('ntmsel').innerHTML = opt('kyThuat', 'Cán bộ kỹ thuật') + opt('keToan', 'Kế toán') + opt('donVi', 'Đơn vị khảo sát');
+  capNhatBoLoc();
+  veDSNTM();
+}
+function capNhatBoLoc() {
+  const coLoc = FN.kt || FN.kto || FN.dv || FN.q || FN.loai;
+  document.getElementById('ntmbo').innerHTML = coLoc ? '<button class="ghost" style="padding:4px 10px" onclick="boLocNTM()">Bỏ lọc</button>' : '';
 }
 function veNTM() {
   const N = dsNTM();
@@ -293,29 +318,22 @@ function veNTM() {
   const can = N.map(x => x.ma).filter(Boolean)[0] || '';
   const tm = N.reduce((a, x) => a + tmNTM(x), 0);
   const thieu = N.filter(x => !x.kyThuat || !x.keToan).length;
-  const opt = (k, ten) => `<div><label>${ten}</label><select onchange="FN['${k === 'kyThuat' ? 'kt' : k === 'keToan' ? 'kto' : 'dv'}']=this.value;ve()"><option value="">Tất cả</option>` +
-    demTheo(N, k).map(([v, n]) => `<option value="${esc(v)}" ${FN[k === 'kyThuat' ? 'kt' : k === 'keToan' ? 'kto' : 'dv'] === v ? 'selected' : ''}>${esc(v)} (${n})</option>`).join('') + '</select></div>';
-  const chips = (k, fk, ten) => `<div style="margin-top:10px"><span class="muted">${ten}:</span><div class="chips">` +
-    demTheo(N, k).map(([v, n]) => `<button class="chip ${FN[fk] === v ? 'on' : ''}" onclick="setFN('${fk}','${esc(v).replace(/'/g, "\\'")}')">${esc(v)} · ${n}</button>`).join('') + '</div></div>';
-  let h = `<div class="card"><b>NTM 2026-2030</b><div class="muted">${esc(nguon)}${can ? ' · ' + esc(can) : ''} · triệu đồng</div>
+  const h = `<div class="card"><b>NTM 2026-2030</b><div class="muted">${esc(nguon)}${can ? ' · ' + esc(can) : ''} · triệu đồng</div>
     <div class="kpis" style="margin-top:8px">
       <div class="kpi"><div class="n">${N.length}</div><div class="l">Dự án</div></div>
       <div class="kpi"><div class="n">${f0(tm)}</div><div class="l">Tổng mức đầu tư (${tr(tm)})</div></div>
       <div class="kpi"><div class="n ${thieu ? 'thieu' : ''}">${thieu}</div><div class="l">Chưa ghi đủ kỹ thuật / kế toán</div></div>
     </div>
   </div>
-  <div class="card"><div class="ct">Phân theo loại công trình</div><div class="cs">Theo cột Quy mô · bấm ô để lọc danh sách bên dưới, bấm lại để bỏ lọc</div><div class="tiles">` +
-    LOAI.map(([k, ten]) => { const ds = N.filter(x => loaiNTM(x) === k), on = FN.loai === k;
-      return `<div class="tile" style="${on ? 'border-color:var(--pri);background:#e8f0fb' : ''}" onclick="setFN('loai','${k}')"><div class="l">${k === 'Khác' ? 'Khác' : k}</div><div class="v">${ds.length} <span style="font-size:14px;font-weight:400;color:var(--mute)">dự án</span></div><div class="m">${ten} · TMĐT ${tr(ds.reduce((a, x) => a + tmNTM(x), 0))}</div></div>`; }).join('') + `</div></div>
-  <div class="dash" style="margin-bottom:12px"><div class="card c6"><div class="ct">NTM 2026-2030 theo cán bộ kỹ thuật</div><div class="cs">Số dự án mỗi người phụ trách · bấm tên để lọc danh sách bên dưới</div>${barNTM(N, 'kyThuat', 'kt')}</div>
-    <div class="card c6"><div class="ct">NTM 2026-2030 theo kế toán</div><div class="cs">Số dự án mỗi người phụ trách · bấm tên để lọc danh sách bên dưới</div>${barNTM(N, 'keToan', 'kto')}</div></div>`;
-  const L = locNTM(N), tmL = L.reduce((a, x) => a + tmNTM(x), 0);
-  const coLoc = FN.kt || FN.kto || FN.dv || FN.q || FN.loai;
-  h += `<div class="card"><div class="fl">${opt('kyThuat', 'Cán bộ kỹ thuật')}${opt('keToan', 'Kế toán')}${opt('donVi', 'Đơn vị khảo sát')}
-      <div><label>Tìm tên dự án</label><input id="ntmq" value="${esc(FN.q)}" placeholder="VD: đường số 23" oninput="FN.q=this.value;veDSNTM()"></div></div>
-    <div class="row" style="margin-top:8px"><span class="muted" id="ntmdem"></span>${coLoc ? '<button class="ghost right" style="padding:4px 10px" onclick="FN={kt:\'\',kto:\'\',dv:\'\',q:\'\',loai:\'\'};ve()">Bỏ lọc</button>' : ''}</div></div>
-    <div class="grp open"><div class="bd" id="ntmds"></div></div>`;
-  setTimeout(veDSNTM, 0);
+  <div class="card"><div class="ct">Phân theo loại công trình</div><div class="cs">Theo cột Quy mô · bấm ô để lọc danh sách bên dưới, bấm lại để bỏ lọc</div><div class="tiles" id="ntmloai"></div></div>
+  <div class="card"><div class="row"><div><div class="ct">Bản đồ công trình NTM xã Củ Chi</div><div class="cs">Theo bản đồ "Theo dõi công trình nông thôn mới xã Củ Chi" trên Google My Maps · bấm vào tuyến để xem tên</div></div>
+    <a class="right" href="https://www.google.com/maps/d/viewer?mid=1XmDjYsP9y_6OLt5fUA67kOKnhOoVFYk&ll=10.959270950258373%2C106.55813590505828&z=13" target="_blank" style="font-size:13px">Mở bản đồ lớn ↗</a></div>
+    <iframe src="https://www.google.com/maps/d/embed?mid=1XmDjYsP9y_6OLt5fUA67kOKnhOoVFYk&ll=10.959270950258373%2C106.55813590505828&z=13" loading="lazy" style="width:100%;height:min(520px,70vh);border:0;border-radius:8px;margin-top:10px" title="Bản đồ công trình NTM xã Củ Chi"></iframe></div>
+  <div class="dash" style="margin-bottom:12px"><div class="card c6"><div class="ct">NTM 2026-2030 theo cán bộ kỹ thuật</div><div class="cs">Số dự án mỗi người phụ trách · bấm tên để lọc danh sách bên dưới</div><div id="ntmbkt"></div></div>
+    <div class="card c6"><div class="ct">NTM 2026-2030 theo kế toán</div><div class="cs">Số dự án mỗi người phụ trách · bấm tên để lọc danh sách bên dưới</div><div id="ntmbkto"></div></div></div>
+  <div class="card" id="ntmfl"></div>
+  <div class="grp open"><div class="bd" id="ntmds"></div></div>`;
+  setTimeout(capNhatNTM, 0);
   return h;
 }
 function veDSNTM() {
