@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Phiếu gửi yêu cầu muasamcong – BQLDA xã Củ Chi</title><style>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Phiếu gửi yêu cầu muasamcong – Ban QLDA ĐTXD xã Củ Chi</title><style>
 :root{--bg:#f6f7f9;--card:#fff;--ink:#1d2433;--mute:#667085;--line:#e4e7ec;--pri:#1f5fa8;--pri2:#e8f0fb;--ok:#1a7f4b;--warn:#b45309;--bad:#b42318}
 *{box-sizing:border-box}
 body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.45}
@@ -61,6 +61,53 @@ input.lech::placeholder{color:var(--bad);opacity:1}
 .ghichu{font-size:12px;margin-top:3px}
 .ghichu.ok{color:var(--ok)}.ghichu.bad{color:var(--bad)}
 @media (max-width:640px){.hide-sm{display:none}.tbl{font-size:13px}}
+
+/* ===== Giao diện navy – vàng đồng (đồng bộ trang tổng quan) ===== */
+:root{--pri:#0f2a4a;--pri2:#eef1f6;--navy2:#163a63;--gold:#b8893b;--gold2:#d9b25f;--goldl:rgba(184,137,59,.45);--bg:#f4f5f7}
+body{background:#f4f5f7 radial-gradient(900px 380px at 100% 0,rgba(184,137,59,.08),transparent 70%)}
+header{background:linear-gradient(120deg,#0a1d36,#0f2a4a 55%,#163a63);border-bottom:3px solid var(--gold);box-shadow:0 2px 10px rgba(10,29,54,.25);padding:18px max(14px,calc((100% - 1080px)/2 + 14px));display:flex;align-items:center;gap:14px}
+header .logo{flex:none;width:46px;height:46px;border-radius:50%;border:2px solid var(--gold2);display:grid;place-items:center;background:rgba(217,178,95,.08);color:var(--gold2)}
+header .logo svg{width:24px;height:24px}
+header .org{font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:#e8d6ae}
+header h1{margin:2px 0 0;font-size:19px;font-weight:700;color:#fff;letter-spacing:.2px}
+main{max-width:1080px;padding:18px 14px 30px;display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;align-items:start}
+@media (max-width:900px){main{grid-template-columns:1fr}aside{order:-1}}
+.card{border-color:var(--goldl);border-radius:12px;padding:0;box-shadow:0 4px 16px rgba(15,42,74,.06);overflow:visible}
+#box>.loading,#box>.msg{margin:16px}
+.sec{padding:16px 20px 18px;border-top:1px solid #ece6d9}
+.sec:first-of-type{border-top:0}
+.sec h2{display:flex;align-items:center;gap:10px;margin:0 0 2px;font-size:15px;color:var(--pri)}
+.sec h2 .so{flex:none;width:26px;height:26px;border-radius:50%;background:var(--pri);color:var(--gold2);display:grid;place-items:center;font-size:13px;box-shadow:0 0 0 2px #f3e6c8}
+.sec .mo{color:var(--mute);font-size:13px;margin:0 0 4px 36px}
+label{color:#24324a}
+input,select,textarea{border-color:#d3d8e0;transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus,textarea:focus{outline:0;border-color:var(--gold);box-shadow:0 0 0 3px rgba(184,137,59,.18)}
+input[type=file]{padding:8px;background:#fbfaf7;border-style:dashed}
+input[type=file]::file-selector-button{font:inherit;border:1px solid var(--pri);background:var(--pri);color:#fff;border-radius:6px;padding:6px 12px;margin-right:10px;cursor:pointer}
+.luuy{display:flex;gap:10px;align-items:flex-start;margin-top:8px;padding:10px 12px;border-radius:8px;background:#fdf6e7;border:1px solid #ecd9ae;color:#6b4e16;font-size:13px}
+.luuy .i{flex:none;width:20px;height:20px;border-radius:50%;background:var(--gold);color:#fff;font-weight:700;font-style:italic;font-family:Georgia,serif;display:grid;place-items:center;font-size:13px}
+.chan{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:16px 20px;background:#f8f6f1;border-top:1px solid #ece6d9;border-radius:0 0 12px 12px}
+button{background:var(--pri);border-color:var(--pri)}
+button:hover:not(:disabled){background:var(--navy2)}
+button.lon{padding:11px 22px;font-weight:600;box-shadow:inset 0 -2px 0 var(--gold)}
+button.ghost{background:#fff;color:var(--pri);border-color:#c9cfd9}
+button.ghost:hover:not(:disabled){background:#f4f1ea;border-color:var(--gold)}
+aside .card{padding:16px 18px}
+aside h3{margin:0 0 10px;font-size:14px;color:var(--pri);display:flex;align-items:center;gap:8px}
+aside h3::before{content:'';width:4px;height:16px;background:var(--gold);border-radius:2px}
+aside ol{margin:0;padding-left:18px;font-size:13.5px;color:#34405a}
+aside ol li{margin-bottom:6px}
+aside .nho{font-size:12.5px;color:var(--mute);margin-top:10px;padding-top:10px;border-top:1px dashed #e3dccb}
+.msg.ok{background:#ecfdf3;border:1px solid #abefc6}
+.msg.err{border:1px solid #fecdca}
+.nen{position:fixed;inset:0;background:rgba(10,29,54,.55);display:grid;place-items:center;padding:14px;z-index:50}
+.hop{background:#fff;border-radius:12px;max-width:560px;width:100%;max-height:88vh;overflow:auto;border-top:4px solid var(--gold);box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.hop h3{margin:0;padding:16px 20px 6px;color:var(--pri);font-size:16px}
+.hop .mo{padding:0 20px;color:var(--mute);font-size:13px}
+.hop dl{margin:10px 20px 4px;display:grid;grid-template-columns:150px 1fr;gap:6px 12px;font-size:14px}
+.hop dt{color:var(--mute)}.hop dd{margin:0;font-weight:500;word-break:break-word}
+.hop .chan{border-radius:0 0 12px 12px;justify-content:flex-end}
+@media (max-width:560px){.hop dl{grid-template-columns:1fr}.hop dt{margin-top:6px}.sec{padding:14px}.chan{padding:14px}header h1{font-size:16px}}
 </style>
 <script>
 // Cầu nối: trang này nằm ngoài Google nên gọi chương trình Apps Script qua mạng, không gửi tài khoản Google
@@ -91,9 +138,22 @@ window.google = { script: { get run() {
 } } };
 </script></head>
 <body>
-<header><h1>Phiếu gửi yêu cầu thao tác muasamcong</h1><div class="sub">Ban QLDA đầu tư xây dựng xã Củ Chi</div></header>
+<header>
+  <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6M9 11h.01M15 11h.01"/></svg></div>
+  <div><div class="org">Ban Quản lý dự án đầu tư xây dựng xã Củ Chi</div><h1>Phiếu gửi yêu cầu thao tác muasamcong</h1></div>
+</header>
 <main>
   <div class="card" id="box"><div class="loading">Đang tải…</div></div>
+  <aside><div class="card">
+    <h3>Hướng dẫn nhanh</h3>
+    <ol>
+      <li>Gõ vài chữ tên mình rồi chọn trong danh sách.</li>
+      <li>Chọn dự án, rồi chọn gói thầu trong danh sách gợi ý để mã TBMT tự điền.</li>
+      <li>Chọn loại việc, đính kèm hồ sơ (bản PDF mộc đỏ nếu có yêu cầu).</li>
+      <li>Bấm <b>Gửi phiếu</b>, xem lại bảng tóm tắt rồi xác nhận.</li>
+    </ol>
+    <div class="nho">Mỗi phiếu là một việc cho một gói thầu. Phiếu gửi xong vào hàng chờ, cán bộ phụ trách sẽ xử lý và cập nhật trạng thái.</div>
+  </div></aside>
 </main>
 <script>
 let INFO = null;
@@ -207,18 +267,23 @@ function ve() {
   let ten = '';
   try { ten = localStorage.getItem('nguoiGui') || ''; } catch (e) {}
   $('#box').innerHTML = `
-    <div class="muted">Mỗi phiếu là một việc cho một gói thầu. Phiếu gửi xong sẽ vào hàng chờ để xử lý.</div>
-    <label>Người gửi <span class="req">*</span></label><input id="nguoiGui" value="${esc(ten)}" placeholder="Gõ vài chữ để chọn tên, VD: tuyen">
-    <label>Loại việc <span class="req">*</span></label>
-    <select id="loai"><option value="">— Chọn loại việc —</option>${INFO.loai.map((l, i) => `<option value="${i}">${esc(l.ten)}</option>`).join('')}</select>
-    <label>Dự án <span class="req">*</span></label>
-    <input id="duAn" list="dsDuAn" placeholder="Gõ để tìm, hoặc ghi tên dự án">
-    <div class="ghichu" style="color:var(--warn)">Tên dự án hiện sẵn lấy theo Nghị quyết của dự án. Nếu sau khi duyệt dự án tên bị thay đổi, vui lòng báo quản trị để điều chỉnh tên.</div>
-    <datalist id="dsDuAn">${INFO.duAn.map(d => `<option value="${esc(d)}">`).join('')}</datalist>
-    <label>Gói thầu <span class="req" id="goiReq" style="display:none">*</span></label><input id="goiThau" list="dsGoi" placeholder="Tên gói thầu (ghi đúng như trong quyết định)"><datalist id="dsGoi"></datalist>
-    <div id="truong"></div>
-    <div class="row" style="margin-top:16px"><button id="gui">Gửi phiếu</button><span id="tt" class="muted"></span></div>
-    <div id="kq"></div>`;
+    <div class="sec"><h2><span class="so">1</span>Người gửi</h2>
+      <label>Họ và tên <span class="req">*</span></label><input id="nguoiGui" value="${esc(ten)}" placeholder="Gõ vài chữ để chọn tên, VD: tuyen">
+    </div>
+    <div class="sec"><h2><span class="so">2</span>Dự án và gói thầu</h2>
+      <label>Dự án <span class="req">*</span></label>
+      <input id="duAn" list="dsDuAn" placeholder="Gõ để tìm, hoặc ghi tên dự án">
+      <datalist id="dsDuAn">${INFO.duAn.map(d => `<option value="${esc(d)}">`).join('')}</datalist>
+      <div class="luuy"><span class="i">i</span><span>Tên dự án hiện sẵn lấy theo Nghị quyết của dự án. Nếu sau khi duyệt dự án tên bị thay đổi, vui lòng báo quản trị để điều chỉnh tên.</span></div>
+      <label>Gói thầu <span class="req" id="goiReq" style="display:none">*</span></label><input id="goiThau" list="dsGoi" placeholder="Chọn trong danh sách hoặc ghi đúng như trong quyết định"><datalist id="dsGoi"></datalist>
+    </div>
+    <div class="sec"><h2><span class="so">3</span>Loại việc và hồ sơ kèm theo</h2>
+      <label>Loại việc <span class="req">*</span></label>
+      <select id="loai"><option value="">— Chọn loại việc —</option>${INFO.loai.map((l, i) => `<option value="${i}">${esc(l.ten)}</option>`).join('')}</select>
+      <div id="truong"></div>
+      <div id="kq"></div>
+    </div>
+    <div class="chan"><button id="gui" class="lon">Gửi phiếu</button><span id="tt" class="muted"></span></div>`;
   $('#loai').onchange = veTruong;
   $('#gui').onclick = gui;
   goiY($('#nguoiGui'), () => NGUOI_GUI);
@@ -284,6 +349,27 @@ function call(fn, ...args) {
   return new Promise((ok, no) => google.script.run.withSuccessHandler(ok).withFailureHandler(no)[fn](...args));
 }
 
+// Bảng tóm tắt để người gửi xem lại trước khi gửi.
+function xacNhan(meta, files) {
+  return new Promise(xong => {
+    const dong = (n, v) => v ? `<dt>${esc(n)}</dt><dd>${esc(v)}</dd>` : '';
+    const nhom = {};
+    files.forEach(x => (nhom[x.n] = nhom[x.n] || []).push(x.f.name));
+    const n = document.createElement('div'); n.className = 'nen';
+    n.innerHTML = `<div class="hop" role="dialog" aria-modal="true">
+      <h3>Xem lại phiếu trước khi gửi</h3><div class="mo">Kiểm tra đúng dự án, gói thầu và hồ sơ rồi bấm Xác nhận gửi.</div>
+      <dl>${dong('Người gửi', meta.nguoiGui)}${dong('Loại việc', meta.loaiViec)}${dong('Dự án', meta.duAn)}${dong('Gói thầu', meta.goiThau)}
+      ${meta.khai.map(k => dong(k.n, k.v)).join('')}
+      ${Object.keys(nhom).map(k => dong(k, nhom[k].join(', '))).join('')}</dl>
+      <div class="chan"><button class="ghost" data-x="0">Quay lại sửa</button><button class="lon" data-x="1">Xác nhận gửi</button></div></div>`;
+    n.addEventListener('click', e => {
+      const b = e.target.closest('[data-x]');
+      if (b || e.target === n) { n.remove(); xong(!!(b && b.dataset.x === '1')); }
+    });
+    document.body.appendChild(n);
+  });
+}
+
 async function gui() {
   const l = INFO.loai[$('#loai').value];
   const meta = { nguoiGui: $('#nguoiGui').value.trim(), loaiViec: l ? l.ten : '', duAn: $('#duAn').value.trim(), goiThau: $('#goiThau').value.trim(), khai: [] };
@@ -312,7 +398,9 @@ async function gui() {
       meta.khai.push({ n: t.nhan, v: val });
     }
   });
-  if (loi.length) { $('#kq').innerHTML = '<div class="msg err">Còn thiếu: ' + loi.map(esc).join('; ') + '</div>'; return; }
+  if (loi.length) { $('#kq').innerHTML = '<div class="msg err">Còn thiếu: ' + loi.map(esc).join('; ') + '</div>'; $('#kq').scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
+  $('#kq').innerHTML = '';
+  if (!(await xacNhan(meta, files))) return;
   try { localStorage.setItem('nguoiGui', meta.nguoiGui); } catch (e) {}
   $('#gui').disabled = true; $('#kq').innerHTML = '';
   try {
@@ -328,8 +416,9 @@ async function gui() {
     $('#tt').textContent = 'Đang ghi phiếu…';
     await call('ghiPhieu', meta, p, up);
     $('#tt').textContent = '';
-    $('#box').innerHTML = `<div class="msg ok"><b>Đã gửi phiếu ${esc(p.ma)}</b><br>${esc(meta.loaiViec)} – ${esc(meta.duAn)}${meta.goiThau ? ' – ' + esc(meta.goiThau) : ''}<br>${up.length} file đã tải lên.</div>
-      <div style="margin-top:12px"><button onclick="ve()">Gửi phiếu khác</button></div>`;
+    $('#box').innerHTML = `<div class="sec"><h2><span class="so">✓</span>Đã gửi phiếu ${esc(p.ma)}</h2>
+      <div class="msg ok">${esc(meta.loaiViec)} – ${esc(meta.duAn)}${meta.goiThau ? ' – ' + esc(meta.goiThau) : ''}<br>${up.length} file đã tải lên. Phiếu đã vào hàng chờ xử lý.</div></div>
+      <div class="chan"><button class="lon" onclick="ve()">Gửi phiếu khác</button></div>`;
   } catch (e) {
     $('#tt').textContent = '';
     $('#kq').innerHTML = '<div class="msg err">Gửi chưa được: ' + esc(e.message || e) + '. Thử gửi lại giúp.</div>';
