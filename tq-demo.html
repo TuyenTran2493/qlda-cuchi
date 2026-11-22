@@ -301,6 +301,7 @@ function veTH5() {
       onmousemove="tip(event,'${ttip(x.g)}')" onmouseleave="tip(event)" onclick="tip(event);moTH(${x.g.gi})"/>`).join('') +
     seg.filter(x => x.p >= 5).map(x => `<text class="pl" x="${x.lx}" y="${x.ly + 4}" text-anchor="middle">${Math.round(x.p)}%</text>`).join('') +
     `<g class="nut" onclick="TH5_MO=!TH5_MO;TH5_ANIM=TH5_MO;ve()"><circle cx="${CX}" cy="${CX}" r="${TH5_MO ? R - SW / 2 - 4 : R + SW / 2}" fill="${TH5_MO ? '#fff' : 'var(--pri)'}"/>
+      ${hinhMo(CX, TH5_MO ? R - SW / 2 - 4 : R + SW / 2, TH5_MO ? '#1f5fae' : '#fff', TH5_MO ? .10 : .2)}
       <text x="${CX}" y="${CX - 4}" text-anchor="middle" font-size="${TH5_MO ? 30 : 40}" font-weight="700" fill="${TH5_MO ? '#1d2433' : '#fff'}">${n}</text>
       <text x="${CX}" y="${CX + 18}" text-anchor="middle" font-size="12" fill="${TH5_MO ? '#667085' : '#dbe7ff'}">dự án trung hạn</text>
       <text x="${CX}" y="${CX + 36}" text-anchor="middle" font-size="11" fill="${TH5_MO ? '#98a2b3' : '#fff'}">${TH5_MO ? 'bấm để thu lại' : 'bấm để xem nhóm ▸'}</text></g></svg>`;
@@ -312,6 +313,22 @@ function veTH5() {
     <div class="dwrap">${svg}${lg}</div>`;
 }
 let TH5_MO = false, TH5_ANIM = false;
+// Hình chìm trong nút tròn: dãy nhà, cần cẩu, con đường (vẽ theo bán kính 112 rồi co theo r)
+function hinhMo(cx, r, mau, op) {
+  const k = r / 112;
+  const nha = [[-104, 18, 34], [-88, 22, 58], [-64, 16, 40], [-46, 26, 74], [-18, 20, 50], [4, 28, 86], [34, 18, 46], [54, 24, 66], [80, 26, 38]];
+  return `<g transform="translate(${cx} ${cx}) scale(${k})" opacity="${op}" fill="${mau}" stroke="${mau}" pointer-events="none">
+    <clipPath id="cpMo"><circle r="111"/></clipPath><g clip-path="url(#cpMo)">
+    ${nha.map(([x, w, h]) => `<rect x="${x}" y="${62 - h}" width="${w}" height="${h}" stroke="none"/>` +
+      Array.from({ length: Math.floor((h - 8) / 12) }, (_, i) => `<rect x="${x + 4}" y="${62 - h + 6 + i * 12}" width="${w - 8}" height="4" fill="${TH5_MO ? '#fff' : 'var(--pri)'}" stroke="none" opacity=".9"/>`).join('')).join('')}
+    <line x1="62" y1="62" x2="62" y2="-58" stroke-width="3"/><line x1="22" y1="-56" x2="108" y2="-56" stroke-width="3"/>
+    <line x1="62" y1="-74" x2="30" y2="-56" stroke-width="1.5"/><line x1="62" y1="-74" x2="100" y2="-56" stroke-width="1.5"/>
+    <line x1="96" y1="-56" x2="96" y2="-30" stroke-width="1.2"/><rect x="91" y="-30" width="10" height="7" stroke="none"/>
+    <path d="M-120 62 H120 V120 H-120Z" stroke="none"/>
+    <path d="M-14 62 L-60 120 M14 62 L60 120" stroke="${TH5_MO ? '#fff' : 'var(--pri)'}" stroke-width="3"/>
+    <path d="M0 66 V120" stroke="${TH5_MO ? '#fff' : 'var(--pri)'}" stroke-width="2.5" stroke-dasharray="8 7"/>
+    <circle cx="-86" cy="-70" r="12" stroke="none" opacity=".7"/></g></g>`;
+}
 function moTH(gi) { OPEN['th_' + gi] = true; chuyen('th'); setTimeout(() => { const e = document.getElementById('th_' + gi); if (e) e.scrollIntoView(); }, 50); }
 function chuyen(t) { document.querySelector(`#tabs button[data-t="${t}"]`).click(); }
 function moNhom(k) { OPEN['g_' + k] = true; chuyen('da'); setTimeout(() => { const e = document.getElementById('g_' + k); if (e) e.scrollIntoView(); }, 50); }
