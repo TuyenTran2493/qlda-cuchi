@@ -266,6 +266,9 @@ let FN = { kt: '', kto: '', dv: '', q: '' };
 function nhomNTM() { return D && D.trungHan ? D.trungHan.nhom.filter(g => /XNTM|NTM|nông thôn mới/i.test(g.ten)) : []; }
 function dsNTM() { return nhomNTM().reduce((a, g) => a.concat(g.duAn), []); }
 function tmNTM(x) { return x.tmdtQD || x.tmdtCT || 0; }
+function loaiNTM(x) { const q = ((x.quyMo || '') + ' ' + (x.ten || '')).toUpperCase();
+  return /BTXM|BÊ TÔNG XI MĂNG/.test(q) ? 'BTXM' : /BTNN|BÊ TÔNG NHỰA/.test(q) ? 'BTNN' : 'Khác'; }
+const LOAI = [['BTXM', 'Đường bê tông xi măng'], ['BTNN', 'Đường bê tông nhựa nóng'], ['Khác', 'Công trình khác']];
 function demTheo(ds, k) {
   const m = {};
   ds.forEach(x => { const v = (x[k] || '').trim() || '(chưa ghi)'; m[v] = (m[v] || 0) + 1; });
@@ -274,7 +277,7 @@ function demTheo(ds, k) {
 function locNTM(ds) {
   const q = FN.q.trim().toLowerCase();
   const khop = (v, f) => !f || (f === '(chưa ghi)' ? !(v || '').trim() : (v || '').trim() === f);
-  return ds.filter(x => khop(x.kyThuat, FN.kt) && khop(x.keToan, FN.kto) && khop(x.donVi, FN.dv) &&
+  return ds.filter(x => (!FN.loai || loaiNTM(x) === FN.loai) && khop(x.kyThuat, FN.kt) && khop(x.keToan, FN.kto) && khop(x.donVi, FN.dv) &&
     (!q || (x.ten + ' ' + (x.quyMo || '')).toLowerCase().includes(q)));
 }
 function setFN(k, v) { FN[k] = FN[k] === v ? '' : v; ve(); }
@@ -301,13 +304,16 @@ function veNTM() {
       <div class="kpi"><div class="n ${thieu ? 'thieu' : ''}">${thieu}</div><div class="l">Chưa ghi đủ kỹ thuật / kế toán</div></div>
     </div>
   </div>
+  <div class="card"><div class="ct">Phân theo loại công trình</div><div class="cs">Theo cột Quy mô · bấm ô để lọc danh sách bên dưới, bấm lại để bỏ lọc</div><div class="tiles">` +
+    LOAI.map(([k, ten]) => { const ds = N.filter(x => loaiNTM(x) === k), on = FN.loai === k;
+      return `<div class="tile" style="${on ? 'border-color:var(--pri);background:#e8f0fb' : ''}" onclick="setFN('loai','${k}')"><div class="l">${k === 'Khác' ? 'Khác' : k}</div><div class="v">${ds.length} <span style="font-size:14px;font-weight:400;color:var(--mute)">dự án</span></div><div class="m">${ten} · TMĐT ${tr(ds.reduce((a, x) => a + tmNTM(x), 0))}</div></div>`; }).join('') + `</div></div>
   <div class="dash" style="margin-bottom:12px"><div class="card c6"><div class="ct">NTM 2026-2030 theo cán bộ kỹ thuật</div><div class="cs">Số dự án mỗi người phụ trách · bấm tên để lọc danh sách bên dưới</div>${barNTM(N, 'kyThuat', 'kt')}</div>
     <div class="card c6"><div class="ct">NTM 2026-2030 theo kế toán</div><div class="cs">Số dự án mỗi người phụ trách · bấm tên để lọc danh sách bên dưới</div>${barNTM(N, 'keToan', 'kto')}</div></div>`;
   const L = locNTM(N), tmL = L.reduce((a, x) => a + tmNTM(x), 0);
-  const coLoc = FN.kt || FN.kto || FN.dv || FN.q;
+  const coLoc = FN.kt || FN.kto || FN.dv || FN.q || FN.loai;
   h += `<div class="card"><div class="fl">${opt('kyThuat', 'Cán bộ kỹ thuật')}${opt('keToan', 'Kế toán')}${opt('donVi', 'Đơn vị khảo sát')}
       <div><label>Tìm tên dự án</label><input id="ntmq" value="${esc(FN.q)}" placeholder="VD: đường số 23" oninput="FN.q=this.value;veDSNTM()"></div></div>
-    <div class="row" style="margin-top:8px"><span class="muted" id="ntmdem"></span>${coLoc ? '<button class="ghost right" style="padding:4px 10px" onclick="FN={kt:\'\',kto:\'\',dv:\'\',q:\'\'};ve()">Bỏ lọc</button>' : ''}</div></div>
+    <div class="row" style="margin-top:8px"><span class="muted" id="ntmdem"></span>${coLoc ? '<button class="ghost right" style="padding:4px 10px" onclick="FN={kt:\'\',kto:\'\',dv:\'\',q:\'\',loai:\'\'};ve()">Bỏ lọc</button>' : ''}</div></div>
     <div class="grp open"><div class="bd" id="ntmds"></div></div>`;
   setTimeout(veDSNTM, 0);
   return h;
@@ -322,9 +328,9 @@ function veDSNTM() {
     const id = 'ntm_' + (x.ten || i);
     const kt = x.kyThuat ? esc(x.kyThuat) : '<span class="thieu">chưa ghi</span>';
     const kto = x.keToan ? esc(x.keToan) : '<span class="thieu">chưa ghi</span>';
-    h += `<tr class="click" onclick="ROW['${esc(id).replace(/'/g, "\\'")}']=!ROW['${esc(id).replace(/'/g, "\\'")}'];veDSNTM()"><td>${i + 1}</td><td>${esc(x.ten)}</td><td class="r">${f0(tmNTM(x))}</td><td class="hide-sm" style="white-space:nowrap">${esc(x.tg || x.tgCT)}</td>` +
+    h += `<tr class="click" onclick="ROW['${esc(id).replace(/'/g, "\\'")}']=!ROW['${esc(id).replace(/'/g, "\\'")}'];veDSNTM()"><td>${i + 1}</td><td>${esc(x.ten)} <span class="pill">${loaiNTM(x)}</span></td><td class="r">${f0(tmNTM(x))}</td><td class="hide-sm" style="white-space:nowrap">${esc(x.tg || x.tgCT)}</td>` +
       `<td style="white-space:nowrap"><div class="who">KS: <b>${x.donVi ? esc(x.donVi) : '<span class="thieu">chưa ghi</span>'}</b></div><div class="who">KT: <b>${kt}</b></div><div class="who">KTo: <b>${kto}</b></div></td></tr>`;
-    if (ROW[id]) h += `<tr><td colspan="5"><dl class="detail">${[['Quy mô', x.quyMo], ['Căn cứ', x.ma], ['Chủ trương đầu tư', x.chuTruong], ['QĐ đầu tư', x.qdDT], ['Thời gian KC–HT', x.tg || x.tgCT], ['Đơn vị thực hiện khảo sát', x.donVi], ['Cán bộ kỹ thuật', x.kyThuat], ['Kế toán', x.keToan], ['Ghi chú', x.ghiChu]].filter(a => a[1]).map(a => `<dt>${esc(a[0])}</dt><dd>${esc(a[1])}</dd>`).join('')}</dl></td></tr>`;
+    if (ROW[id]) h += `<tr><td colspan="5"><dl class="detail">${[['Loại', loaiNTM(x)], ['Quy mô', x.quyMo], ['Căn cứ', x.ma], ['Chủ trương đầu tư', x.chuTruong], ['QĐ đầu tư', x.qdDT], ['Thời gian KC–HT', x.tg || x.tgCT], ['Đơn vị thực hiện khảo sát', x.donVi], ['Cán bộ kỹ thuật', x.kyThuat], ['Kế toán', x.keToan], ['Ghi chú', x.ghiChu]].filter(a => a[1]).map(a => `<dt>${esc(a[0])}</dt><dd>${esc(a[1])}</dd>`).join('')}</dl></td></tr>`;
   });
   box.innerHTML = h + '</table></div><div class="muted" style="padding:8px 12px">KS: đơn vị khảo sát · KT: cán bộ kỹ thuật · KTo: kế toán · bấm dòng để xem chi tiết</div>';
 }
