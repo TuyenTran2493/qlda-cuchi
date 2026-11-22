@@ -953,8 +953,8 @@ function dsVB(map, order) {
 function capNhatVB() { const e = document.getElementById('dsVB'); if (e) e.innerHTML = dsVB(); }
 function chonVB(k) { VBSEL = VBSEL === k ? '' : k; VBQ = ''; ve(); setTimeout(() => { const e = document.getElementById('dsVB'); if (e && VBSEL) e.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 30); }
 // ---------- BIỂU MẪU (mẫu hợp đồng, biên bản thương thảo) ----------
-// File mẫu nằm ngay trong repo (thư mục bieu-mau/), danh sách ở bieu-mau/danh-muc.json:
-// thêm mẫu mới = chép file vào bieu-mau/ và thêm một dòng vào danh-muc.json.
+// File mẫu nằm trên Google Drive của chị (thư mục "HĐ-BBHT mẫu giai đoạn CBĐT", không công khai);
+// danh sách ở bieu-mau/danh-muc.json (id file Drive). Người lạ bấm sẽ bị Google yêu cầu quyền truy cập.
 let BM = null, BMQ = '', BMLOI = '';
 const ICO_BM = {
   ks: '<path d="M3 20l5-9 4 6 3-4 6 7z"/><circle cx="17" cy="6" r="2.5"/>',
@@ -984,10 +984,10 @@ function dsBM() {
     if (!goi.length) return;
     out += `<div class="bmn">${esc(n.ten)} <span>${esc(n.moTa || '')}</span></div><div class="bmc">` + goi.map(({ g, files }) => `<div class="bmk">
       <div class="bmh"><div class="vbi">${SVGI(ICO_BM[g.ma] || ICO_VB['hợp đồng'])}</div><b>${esc(g.ten)}</b></div>` +
-      files.map(f => { const u = urlBM(f.file), ten = f.file.split('/').pop();
+      files.map(f => { const xem = f.id ? 'https://drive.google.com/file/d/' + f.id + '/view' : 'https://view.officeapps.live.com/op/view.aspx?src=' + encodeURIComponent(urlBM(f.file)), tai = f.id ? 'https://drive.google.com/uc?export=download&id=' + f.id : urlBM(f.file);
         return `<div class="bmf"><div class="bmt ${f.loai === 'bb' ? 'bb' : 'hd'}">${f.loai === 'bb' ? 'BB' : 'HĐ'}</div>
         <div><b>${esc(f.ten)}</b><span>Word · ${f.kb ? f.kb.toLocaleString('vi-VN') + ' KB' : 'docx'}</span></div>
-        <div class="bma"><a class="x" target="_blank" rel="noopener" href="https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(u)}">Xem</a><a class="t" href="${esc(u)}" download="${esc(ten)}">Tải về</a></div></div>`; }).join('') + '</div>').join('') + '</div>';
+        <div class="bma"><a class="x" target="_blank" rel="noopener" href="${esc(xem)}">Xem</a><a class="t" target="_blank" rel="noopener" href="${esc(tai)}">Tải về</a></div></div>`; }).join('') + '</div>').join('') + '</div>';
   });
   return out || `<div class="bmgc">Không có mẫu nào khớp "${esc(BMQ)}".</div>`;
 }
