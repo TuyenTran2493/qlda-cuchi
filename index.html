@@ -252,16 +252,58 @@ function tuDienMa() {
       gc.textContent = 'Gói thầu khớp nhưng sổ theo dõi chưa có mã; nếu biết thì ghi vào.';
     } else el.placeholder = r.tt === 'chuaTai' ? 'Đang tải danh sách gói thầu…' : 'Tự điền khi nhập đúng tên công trình và tên gói thầu';
   });
+  tuChonDuThao(l, r);
 }
 function capNhatGoiDS() {
   const dl = $('#dsGoi'); if (!dl) return;
   const p = GOI && GOI[chuan($('#duAn').value)];
   dl.innerHTML = p ? [...new Set(p.goi.map(g => g.ten))].map(t => `<option value="${esc(t)}">`).join('') : '';
 }
+// Bổ sung ô khai (25/11/2026): phiếu KQ chỉ định thầu rút gọn mà gói chưa gửi dự thảo HĐ
+// thì bắt kèm file dự thảo + thông tin nhà thầu để xử lý gộp (đăng + gửi dự thảo, rồi đăng KQ).
+const DK_DT = 'Gói này đã gửi dự thảo HĐ trên muasamcong chưa?';
+function boSungLoai(info) {
+  const coMST = l => l.truong.some(t => /m[aã] s[oố] thu[eế]/i.test(t.nhan));
+  info.loai.forEach(l => {
+    const ten = chuan(l.ten);
+    if (ten.includes('du thao hd chi dinh thau') && !coMST(l))
+      l.truong.push({ k: 'text', nhan: 'Mã số thuế nhà thầu', bat: 1, goiY: 'VD: 0312345678' });
+    if (ten.includes('kq chi dinh thau rut gon') && !l.truong.some(t => t.dk)) {
+      const chua = { dkBat: 'Chưa gửi', dkAn: 'Đã gửi' };
+      l.truong.forEach(t => { if (laOMa(t)) { t.dkBat = 'Đã gửi'; t.dkAn = 'Chưa gửi'; } });
+      l.truong.unshift({ k: 'select', nhan: DK_DT, chon: ['Đã gửi', 'Chưa gửi'], dk: 1, bat: 1, kqDT: 1 });
+      l.truong.push(
+        { k: 'file', nhan: 'File dự thảo hợp đồng', accept: '.pdf,.doc,.docx', ...chua },
+        { k: 'text', nhan: 'Tên nhà thầu được chỉ định', ...chua },
+        { k: 'text', nhan: 'Mã số thuế nhà thầu', goiY: 'VD: 0312345678', ...chua },
+        { k: 'text', nhan: 'Địa chỉ nhà thầu', ...chua });
+      l.note = (l.note ? l.note + ' ' : '') + 'Gói chưa gửi dự thảo HĐ thì đính kèm thêm file dự thảo và thông tin nhà thầu; phiếu sẽ được xử lý gộp: đăng và gửi dự thảo, rồi đăng kết quả.';
+    }
+  });
+}
+// Tự chọn "Đã gửi"/"Chưa gửi" theo sổ theo dõi đấu thầu (có mã DC… là đã gửi). Người gửi chọn tay thì giữ nguyên.
+function tuChonDuThao(l, r) {
+  const i = l.truong.findIndex(t => t.kqDT);
+  if (i < 0) return;
+  const s = document.querySelector(`[data-i="${i}"]`);
+  if (!s) return;
+  let gc = document.querySelector(`[data-gdk="${i}"]`);
+  if (!gc) { gc = document.createElement('div'); gc.className = 'ghichu'; gc.dataset.gdk = i; s.after(gc); }
+  s.onchange = () => { s.dataset.tay = '1'; apDK(); };
+  if (s.dataset.tay === '1') return;
+  gc.className = 'ghichu'; gc.textContent = '';
+  if (r.tt === 'khop' && /DC\s*\d/i.test(r.ma)) {
+    s.value = 'Đã gửi'; gc.classList.add('ok'); gc.textContent = '✓ Sổ theo dõi đã có mã dự thảo HĐ của gói này';
+  } else if (r.tt === 'khop' || r.tt === 'chuaMa') {
+    s.value = 'Chưa gửi'; gc.classList.add('bad');
+    gc.textContent = 'Sổ theo dõi chưa có mã dự thảo HĐ (DC…) của gói này: cần đính kèm file dự thảo HĐ và khai thông tin nhà thầu. Nếu chắc chắn đã gửi thì chọn "Đã gửi" và ghi mã DC.';
+  }
+  apDK();
+}
 const $ = s => document.querySelector(s);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-google.script.run.withSuccessHandler(info => { INFO = info; ve(); taiGoi(); })
+google.script.run.withSuccessHandler(info => { INFO = info; boSungLoai(INFO); ve(); taiGoi(); })
   .withFailureHandler(e => $('#box').innerHTML = '<div class="msg err">Lỗi tải phiếu: ' + esc(e.message) + '</div>')
   .getFormInfo();
 
