@@ -302,6 +302,20 @@ a{color:var(--navy2)}
 .bmovh span{display:flex;gap:8px}.bmovb{flex:1;overflow:auto;background:#e9ecf1}.bmovb .docx-wrapper{background:#e9ecf1!important}
 .bmovb .loading,.bmovb .msg{margin:20px}
 @media(max-width:600px){.bmc{grid-template-columns:1fr}.bmf{grid-template-columns:34px 1fr}.bma{grid-column:1/3}}
+/* Hồ sơ & hợp đồng */
+.hsk{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}.hsk.h2{grid-template-columns:repeat(2,1fr)}
+@media(max-width:1000px){.hsk{grid-template-columns:repeat(2,1fr)}}
+.hsk div{border-radius:10px;padding:10px 12px;background:#f7f9fc;border-left:4px solid var(--line)}
+.hsk b{display:block;font-size:22px;line-height:1.2}.hsk span{font-size:12px;color:var(--mute)}
+.hsk .ok{border-color:var(--ok)}.hsk .wa{border-color:#eda100}.hsk .no{border-color:#9aa7b8}.hsk .bad{border-color:var(--bad)}.hsk .pri{border-color:#1d4e89}
+.stk{display:flex;height:14px;border-radius:7px;overflow:hidden;background:#eef1f5}
+.stk i{display:block;height:100%}.stk .ok{background:var(--ok)}.stk .wa{background:#eda100}.stk .no{background:#c9d1dc}.stk .bad{background:var(--bad)}.stk .pri{background:#1d4e89}
+.hsl{margin-top:10px}.hsl .r{display:grid;grid-template-columns:minmax(0,1fr) minmax(120px,45%) 34px;gap:8px;align-items:center;padding:5px 2px}
+.hsl .nm{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hsl .pv{font-size:12px;color:var(--mute);text-align:right}
+.thg{display:flex;gap:10px;align-items:flex-end;height:120px;margin-top:14px;padding:0 4px;border-bottom:1px solid var(--line)}
+.thg div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;font-size:12px;color:var(--mute)}
+.thg i{display:block;width:70%;max-width:46px;background:#1d4e89;border-radius:5px 5px 0 0;min-height:2px}.thg b{color:var(--ink);font-size:13px;margin-bottom:3px}
+.thgx{display:flex;gap:10px;padding:4px 4px 0}.thgx span{flex:1;text-align:center;font-size:12px;color:var(--mute)}
 </style>
 <script>
 // Cầu nối: trang này nằm ngoài Google nên gọi chương trình Apps Script qua mạng, không gửi tài khoản Google
@@ -338,7 +352,7 @@ window.google = { script: { get run() {
 </header>
 <div class="tabs" id="tabs">
   <button data-t="tq" class="on">Tổng quan</button><button data-t="da">Dự án</button>
-  <button data-t="ntm">NTM 2026-2030</button><button data-t="th">Trung hạn 2026–2030</button><button data-t="vb">Văn bản pháp luật</button><button data-t="bm">Biểu mẫu</button>
+  <button data-t="ntm">NTM 2026-2030</button><button data-t="th">Trung hạn 2026–2030</button><button data-t="hs">Hồ sơ &amp; hợp đồng</button><button data-t="vb">Văn bản pháp luật</button><button data-t="bm">Biểu mẫu</button>
 </div>
 <main id="main"><div class="loading">Đang tải số liệu…</div></main>
 <script>
@@ -374,7 +388,7 @@ function ve() {
   if (TAB === 'bm') { m.innerHTML = veBM(); return; }
   if (!D) return;
   const loi = (D.loi || []).length ? `<div class="msg err">Chưa đọc được: ${D.loi.map(esc).join('; ')}</div>` : '';
-  m.innerHTML = loi + ({ tq: veTQ, da: veDA, ntm: veNTM, th: veTH, vb: veVB }[TAB])();
+  m.innerHTML = loi + ({ tq: veTQ, da: veDA, ntm: veNTM, th: veTH, hs: veHS, vb: veVB }[TAB])();
 }
 
 // ---------- TỔNG QUAN ----------
@@ -915,6 +929,48 @@ async function xuatTH() {
     a.download = 'Danh muc trung han 2026-2030 xa Cu Chi.xlsx'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 3000);
   } catch (e) { alert(e.message); }
   if (nut) { nut.disabled = false; nut.innerHTML = cu; }
+}
+
+// ---------- HỒ SƠ & HỢP ĐỒNG (chỉ số liệu tổng hợp, không hiện tên gói/nhà thầu) ----------
+function stk(parts, tong) {
+  return '<div class="stk">' + parts.filter(p => p[0] > 0).map(p => `<i class="${p[1]}" style="width:${tong ? p[0] / tong * 100 : 0}%" title="${esc(p[2])}: ${p[0]}"></i>`).join('') + '</div>';
+}
+function veHS() {
+  const x = D.hoSo;
+  if (!x || !x.tong) return `<div class="card"><div class="ct">Hồ sơ &amp; hợp đồng</div><div class="muted" style="margin-top:6px">Chưa có số liệu hồ sơ năm ${esc(D.nam)}.</div></div>`;
+  const p = (a, b) => b ? Math.round(a / b * 100) : 0;
+  let h = '<div class="dash">';
+  // 1. Tình trạng hồ sơ
+  h += `<div class="card c6"><div class="ct">Hồ sơ gói thầu năm ${esc(D.nam)}</div><div class="cs">Đối chiếu với bộ khung hồ sơ theo từng loại gói · chỉ tính hồ sơ cần có đến thời điểm hiện tại</div>
+    <div class="hsk"><div class="pri"><b>${x.tong}</b><span>Gói thầu đang theo dõi</span></div><div class="ok"><b>${x.du}</b><span>Đủ hồ sơ</span></div>
+    <div class="wa"><b>${x.thieu}</b><span>Còn thiếu hồ sơ</span></div><div class="no"><b>${x.chua}</b><span>Chưa rà soát</span></div></div>
+    <div style="margin-top:14px">${stk([[x.du, 'ok', 'Đủ hồ sơ'], [x.thieu, 'wa', 'Còn thiếu'], [x.chua, 'no', 'Chưa rà soát']], x.tong)}</div>
+    <div class="lg"><span><i style="background:var(--ok)"></i>Đủ ${p(x.du, x.tong)}%</span><span><i style="background:#eda100"></i>Thiếu ${p(x.thieu, x.tong)}%</span><span><i style="background:#c9d1dc"></i>Chưa rà soát ${p(x.chua, x.tong)}%</span></div></div>`;
+  // 2. Thời hạn hợp đồng
+  const hn = x.han, tongHan = hn.quaHan + hn.den15 + hn.conHan + hn.xong + hn.chuaCo;
+  h += `<div class="card c6"><div class="ct">Thời hạn hợp đồng</div><div class="cs">Theo hạn hoàn thành HĐ (đã tính gia hạn/điều chỉnh nếu có)</div>
+    <div class="hsk"><div class="bad"><b>${hn.quaHan}</b><span>Hết hạn, chưa ghi nhận hoàn thành</span></div><div class="wa"><b>${hn.den15}</b><span>Đến hạn trong 15 ngày</span></div>
+    <div class="pri"><b>${hn.conHan}</b><span>Còn hạn</span></div><div class="ok"><b>${hn.xong}</b><span>Đã hoàn thành</span></div></div>
+    <div style="margin-top:14px">${stk([[hn.xong, 'ok', 'Đã hoàn thành'], [hn.conHan, 'pri', 'Còn hạn'], [hn.den15, 'wa', 'Đến hạn trong 15 ngày'], [hn.quaHan, 'bad', 'Hết hạn, chưa ghi nhận hoàn thành'], [hn.chuaCo, 'no', 'Chưa có hạn']], tongHan)}</div>
+    ${hn.chuaCo ? `<div class="muted" style="margin-top:6px">${hn.chuaCo} gói chưa có hạn (HĐ chưa ký hoặc chưa cập nhật ngày hiệu lực).</div>` : ''}</div>`;
+  // 3. Hạn HĐ theo tháng
+  const mx = Math.max(1, ...x.hanThang.map(t => t.n), x.hanSau || 0);
+  const cot = x.hanThang.concat(x.hanSau ? [{ thang: 'Sau đó', n: x.hanSau }] : []);
+  h += `<div class="card c5"><div class="ct">Hợp đồng sắp đến hạn theo tháng</div><div class="cs">Số hợp đồng chưa hoàn thành có hạn rơi vào từng tháng</div>
+    <div class="thg">${cot.map(t => `<div><b>${t.n}</b><i style="height:${t.n / mx * 80}%"></i></div>`).join('')}</div>
+    <div class="thgx">${cot.map(t => `<span>${esc(t.thang)}</span>`).join('')}</div>
+    <div class="hsk h2" style="margin-top:16px"><div class="pri"><b>${x.phuLuc.soHD}</b><span>Hợp đồng có phụ lục</span></div><div class="pri"><b>${x.phuLuc.soPL}</b><span>Phụ lục hợp đồng đã ký</span></div></div></div>`;
+  // 4. Theo loại gói
+  h += `<div class="card c7"><div class="ct">Hồ sơ theo loại gói thầu</div><div class="cs">Mỗi loại gói có bộ khung hồ sơ riêng</div><div class="hsl">` +
+    x.theoLoai.map(l => `<div class="r"><div class="nm" title="${esc(l.ten)}">${esc(l.ten)}</div>${stk([[l.du, 'ok', 'Đủ'], [l.thieu, 'wa', 'Thiếu'], [l.chua, 'no', 'Chưa rà soát']], l.n)}<div class="pv">${l.n}</div></div>`).join('') +
+    `</div><div class="lg"><span><i style="background:var(--ok)"></i>Đủ hồ sơ</span><span><i style="background:#eda100"></i>Còn thiếu</span><span><i style="background:#c9d1dc"></i>Chưa rà soát</span><span>Số cuối dòng: số gói</span></div></div>`;
+  // 5. Đầu hồ sơ hay thiếu
+  if (x.dauHoSo && x.dauHoSo.length) {
+    const m2 = Math.max(...x.dauHoSo.map(t => t.n));
+    h += `<div class="card c12"><div class="ct">Đầu hồ sơ còn thiếu nhiều nhất</div><div class="cs">Tính trên các gói đã rà soát</div><div class="hb">` +
+      x.dauHoSo.map(t => `<div class="r"><div class="nm">${esc(t.ten)}</div><div class="tr"><i class="w" style="width:${t.n / m2 * 100}%"></i></div><div class="pv">${t.n} gói</div></div>`).join('') + '</div></div>';
+  }
+  return h + '</div>';
 }
 
 // ---------- VĂN BẢN PHÁP LUẬT ----------
