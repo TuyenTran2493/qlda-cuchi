@@ -393,8 +393,25 @@ function call(fn, ...args) {
   return new Promise((ok, no) => google.script.run.withSuccessHandler(ok).withFailureHandler(no)[fn](...args));
 }
 
+// Tìm phiếu đã có của cùng dự án + gói thầu và cùng loại việc (dự thảo HĐ và KQ chỉ định thầu tính là liên quan).
+// Bỏ qua phiếu Hủy. Lỗi tải hàng chờ thì cho gửi bình thường (không chặn người gửi).
+function nhomLoai(t) {
+  const c = chuan(t);
+  if (c.includes('du thao hd chi dinh thau') || c.includes('kq chi dinh thau rut gon')) return 'cdt';
+  return c;
+}
+async function timPhieuTrung(meta) {
+  if (!meta.goiThau) return [];
+  try {
+    const d = await call('getHangCho', true);
+    const nl = nhomLoai(meta.loaiViec), da = chuan(meta.duAn), gt = chuan(meta.goiThau);
+    return (d.rows || []).filter(r => r['Trạng thái'] !== 'Hủy' && chuan(r['Dự án']) === da &&
+      chuan(r['Gói thầu']) === gt && nhomLoai(r['Loại việc']) === nl);
+  } catch (e) { return []; }
+}
 // Bảng tóm tắt để người gửi xem lại trước khi gửi.
-function xacNhan(meta, files) {
+function xacNhan(meta, files, trung) {
+  trung = trung || [];
   return new Promise(xong => {
     const dong = (n, v) => v ? `<dt>${esc(n)}</dt><dd>${esc(v)}</dd>` : '';
     const nhom = {};
@@ -405,9 +422,19 @@ function xacNhan(meta, files) {
       <dl>${dong('Người gửi', meta.nguoiGui)}${dong('Loại việc', meta.loaiViec)}${dong('Dự án', meta.duAn)}${dong('Gói thầu', meta.goiThau)}
       ${meta.khai.map(k => dong(k.n, k.v)).join('')}
       ${Object.keys(nhom).map(k => dong(k, nhom[k].join(', '))).join('')}</dl>
+      ${trung.length ? `<div class="msg err" style="margin:0 18px 12px">
+        <b>Gói này đã có phiếu trong hàng chờ:</b><br>${trung.map(r => `${esc(r['Mã phiếu'])} – ${esc(r['Loại việc'])} – ${esc(r['Trạng thái'])} (gửi ${esc(r['Thời gian gửi'])}, ${esc(r['Người gửi'])})`).join('<br>')}
+        <br>Nếu chỉ bổ sung hồ sơ cho phiếu cũ thì ghi "Bổ sung cho phiếu …"; phiếu sẽ được xử lý gộp, không đăng hai lần.
+        <label>Lý do gửi thêm phiếu <span class="req">*</span></label>
+        <textarea id="lyDoTrung" placeholder="VD: Bổ sung file dự thảo cho phiếu P261125-001 / QĐ điều chỉnh số ..."></textarea></div>` : ''}
       <div class="chan"><button class="ghost" data-x="0">Quay lại sửa</button><button class="lon" data-x="1">Xác nhận gửi</button></div></div>`;
     n.addEventListener('click', e => {
       const b = e.target.closest('[data-x]');
+      if (b && b.dataset.x === '1' && trung.length) {
+        const ly = n.querySelector('#lyDoTrung').value.trim();
+        if (!ly) { n.querySelector('#lyDoTrung').focus(); n.querySelector('#lyDoTrung').placeholder = 'Cần ghi lý do trước khi gửi'; return; }
+        meta.khai.push({ n: 'Gửi thêm (trùng phiếu ' + trung.map(r => r['Mã phiếu']).join(', ') + ')', v: ly });
+      }
       if (b || e.target === n) { n.remove(); xong(!!(b && b.dataset.x === '1')); }
     });
     document.body.appendChild(n);
@@ -444,7 +471,10 @@ async function gui() {
   });
   if (loi.length) { $('#kq').innerHTML = '<div class="msg err">Còn thiếu: ' + loi.map(esc).join('; ') + '</div>'; $('#kq').scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
   $('#kq').innerHTML = '';
-  if (!(await xacNhan(meta, files))) return;
+  $('#tt').textContent = 'Đang kiểm tra phiếu trùng…';
+  const trung = await timPhieuTrung(meta);
+  $('#tt').textContent = '';
+  if (!(await xacNhan(meta, files, trung))) return;
   try { localStorage.setItem('nguoiGui', meta.nguoiGui); } catch (e) {}
   $('#gui').disabled = true; $('#kq').innerHTML = '';
   try {
